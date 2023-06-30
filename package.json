@@ -56,5 +56,14 @@
         "typedoc": "0.24.8",
         "typedoc-plugin-markdown": "3.15.3",
         "typescript": "5.1.6"
+    },
+    "peerDependencies": {
+        "preact": "^10.15.1"
+    },
+    "alias": {
+        "react": "preact/compat",
+        "react-dom/test-utils": "preact/test-utils",
+        "react-dom": "preact/compat",
+        "react/jsx-runtime": "preact/jsx-runtime"
     }
 }

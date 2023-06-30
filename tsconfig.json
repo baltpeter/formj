@@ -1,5 +1,5 @@
 {
-    "extends": "@baltpeter/tsconfig",
+    "extends": "@baltpeter/tsconfig/tsconfig.preact.json",
     "include": ["src/**/*"],
     "exclude": ["**/*.tmp.ts"],
     "typedocOptions": {
