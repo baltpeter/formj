@@ -53,6 +53,9 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 <div id={elementIds.row} class="row mb-3">
                     <label for={elementIds.input} class="col-sm-3 col-form-label col-form-label-sm">
                         {schema.title}
+                        {schema.description && (
+                            <i class="bi bi-info-circle" style="margin-left: 5px;" title={schema.description} />
+                        )}
                     </label>
                     <div class="col-sm">{input}</div>
                 </div>
