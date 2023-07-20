@@ -1,6 +1,9 @@
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type { FunctionComponent } from 'preact';
 import { ArrayRenderer } from './array';
+import { BooleanRenderer } from './boolean';
+import { NullRenderer } from './null';
+import { IntegerRenderer, NumberRenderer } from './numerical';
 import { ObjectRenderer } from './object';
 import { StringRenderer } from './string';
 
@@ -26,13 +29,10 @@ const schemaTypeRenderers: Record<string, FunctionComponent<SchemaTypeRendererPr
     array: ArrayRenderer,
 
     string: StringRenderer,
-
-    // TODO:
-    // number
-    // integer
-    // boolean
-    // array
-    // null
+    number: NumberRenderer,
+    integer: IntegerRenderer,
+    boolean: BooleanRenderer,
+    null: NullRenderer,
 };
 
 export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
@@ -60,11 +60,5 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
         return input;
     }
 
-    return (
-        <div id={elementIds.row} class="row mb-3">
-            Unsupported schema type: {schema.type}
-        </div>
-    );
-    // TODO: throw
-    // throw new Error(`Unsupported schema type: ${schema.type}`);
+    throw new Error(`Unsupported schema type: ${schema.type}`);
 };

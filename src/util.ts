@@ -19,6 +19,7 @@ export const emtpyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
             object[key] = emtpyDefaultForJsonSchema(value);
         return object;
     }
+    if (schema.type === 'null') return null;
 
     return undefined;
 };
