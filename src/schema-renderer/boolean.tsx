@@ -15,6 +15,7 @@ export const BooleanRenderer = ({ path, elementIds, schema, required }: SchemaTy
             class="form-select form-select-sm"
             id={elementIds.input}
             required={required}
+            value={value}
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,
@@ -30,9 +31,7 @@ export const BooleanRenderer = ({ path, elementIds, schema, required }: SchemaTy
                         value === v.value
                 )
                 .map(({ value: v, label }) => (
-                    <option value={v + ''} selected={value === v}>
-                        {label}
-                    </option>
+                    <option value={v + ''}>{label}</option>
                 ))}
         </select>
     );

@@ -17,7 +17,6 @@ export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTyp
         <select
             {...commonProps}
             class="form-select form-select-sm"
-            value={undefined}
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,
@@ -28,9 +27,7 @@ export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTyp
                 ...(!required || objectStore.useTracked.getForPath(path) === undefined ? ['undefined'] : []),
                 ...schema.enum,
             ].map((v) => (
-                <option value={v as number} selected={objectStore.useTracked.getForPath(path) === v}>
-                    {v === 'undefined' ? '' : v}
-                </option>
+                <option value={v as number}>{v === 'undefined' ? '' : v}</option>
             ))}
         </select>
     ) : schema.format === 'text' ? (

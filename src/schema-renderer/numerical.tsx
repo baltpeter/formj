@@ -13,6 +13,7 @@ const NumericalRenderer = ({
             class="form-select form-select-sm"
             id={elementIds.input}
             required={required}
+            value={objectStore.useTracked.getForPath(path)}
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,
@@ -23,9 +24,7 @@ const NumericalRenderer = ({
                 ...(!required || objectStore.useTracked.getForPath(path) === undefined ? ['undefined'] : []),
                 ...schema.enum,
             ].map((v) => (
-                <option value={v as number} selected={objectStore.useTracked.getForPath(path) === v}>
-                    {v === 'undefined' ? '' : v}
-                </option>
+                <option value={v as number}>{v === 'undefined' ? '' : v}</option>
             ))}
         </select>
     ) : (
