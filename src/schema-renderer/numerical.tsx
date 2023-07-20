@@ -1,10 +1,16 @@
 import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
 
-const NumericalRenderer = ({ path, elementIds, step }: SchemaTypeRendererProps & { step: 'any' | number }) => (
+const NumericalRenderer = ({
+    path,
+    elementIds,
+    step,
+    required,
+}: SchemaTypeRendererProps & { step: 'any' | number }) => (
     <input
         type="number"
         step={step}
+        required={required}
         class="form-control form-control-sm"
         id={elementIds.input}
         value={objectStore.useTracked.getForPath(path)}

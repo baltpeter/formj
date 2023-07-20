@@ -24,7 +24,7 @@ export const Form = ({ schema, ...props }: FormProps) => {
 
     return (
         <form id={rootId}>
-            <SchemaRenderer schema={schema} id={rootId} path="$" />
+            <SchemaRenderer schema={schema} id={rootId} path="$" required={false} />
         </form>
     );
 };

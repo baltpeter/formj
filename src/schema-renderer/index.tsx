@@ -11,6 +11,8 @@ export type SchemaRendererProps = {
     schema: JSONSchema7Definition;
     id: string;
     path: string;
+
+    required: boolean;
 };
 
 export type SchemaTypeRendererProps = {
@@ -18,6 +20,7 @@ export type SchemaTypeRendererProps = {
     id: string;
     path: string;
 
+    required: boolean;
     elementIds: {
         row: string;
         input: string;
@@ -46,13 +49,27 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (type in schemaTypeRenderers) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const SchemaTypeRenderer = schemaTypeRenderers[type as 'object']!;
-        const input = <SchemaTypeRenderer schema={schema} id={props.id} path={props.path} elementIds={elementIds} />;
+        const input = (
+            <SchemaTypeRenderer
+                schema={schema}
+                id={props.id}
+                path={props.path}
+                elementIds={elementIds}
+                required={props.required}
+            />
+        );
 
         if (schema.title && props.path !== '$')
             return (
                 <div id={elementIds.row} class="row mb-3">
                     <label for={elementIds.input} class="col-sm-3 col-form-label col-form-label-sm">
                         {schema.title}
+                        {props.required && (
+                            <span class="text-danger" title="required">
+                                {' '}
+                                *
+                            </span>
+                        )}
                         {schema.description && (
                             <i class="bi bi-info-circle" style="margin-left: 5px;" title={schema.description} />
                         )}

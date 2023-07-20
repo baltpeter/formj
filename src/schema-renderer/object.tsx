@@ -7,7 +7,12 @@ export const ObjectRenderer = ({ schema, ...props }: SchemaTypeRendererProps) =>
     return (
         <>
             {Object.entries(schema.properties).map(([id, subschema]) => (
-                <SchemaRenderer id={`${props.id}-${id}`} path={`${props.path}.${id}`} schema={subschema} />
+                <SchemaRenderer
+                    id={`${props.id}-${id}`}
+                    path={`${props.path}.${id}`}
+                    schema={subschema}
+                    required={!!schema.required?.includes(id)}
+                />
             ))}
         </>
     );

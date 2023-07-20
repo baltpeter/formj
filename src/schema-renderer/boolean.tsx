@@ -7,13 +7,14 @@ const values = [
     { value: false, label: 'false' },
 ];
 
-export const BooleanRenderer = ({ path, elementIds }: SchemaTypeRendererProps) => {
+export const BooleanRenderer = ({ path, elementIds, required }: SchemaTypeRendererProps) => {
     const value = objectStore.useTracked.getForPath(path);
 
     return (
         <select
             class="form-select"
             id={elementIds.input}
+            required={required}
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,

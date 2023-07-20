@@ -61,6 +61,9 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                                     id={`${props.id}-${index}`}
                                     path={`${props.path}.${index}`}
                                     schema={items}
+                                    // TODO: I don't think this is correct, but I don't see what the correct behavior
+                                    // should be, either.
+                                    required={false}
                                 />
                             </div>
                         </div>
@@ -68,7 +71,13 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                 ) : (
                     <div class="input-group input-group-sm mb-3">
                         {buttons({ index, clazz: 'btn btn-outline-secondary' })}
-                        <SchemaRenderer id={`${props.id}-${index}`} path={`${props.path}.${index}`} schema={items} />
+                        <SchemaRenderer
+                            id={`${props.id}-${index}`}
+                            path={`${props.path}.${index}`}
+                            schema={items}
+                            // TODO: See above.
+                            required={false}
+                        />
                     </div>
                 )
             )}
