@@ -2,6 +2,15 @@ import type { JSX } from 'preact';
 import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
 
+const formatToType = {
+    email: 'email',
+    'idn-email': 'email',
+    uri: 'url',
+    'date-time': 'datetime-local',
+    date: 'date',
+    time: 'time',
+};
+
 export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTypeRendererProps) => {
     const commonProps = {
         pattern: schema.pattern,
@@ -33,6 +42,9 @@ export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTyp
     ) : schema.format === 'text' ? (
         <textarea {...commonProps} rows={5} />
     ) : (
-        <input {...commonProps} type="text" />
+        <input
+            {...commonProps}
+            type={schema.format && schema.format in formatToType ? formatToType[schema.format as 'email'] : 'text'}
+        />
     );
 };
