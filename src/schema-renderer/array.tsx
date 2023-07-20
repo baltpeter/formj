@@ -48,7 +48,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
     return (
         <>
             {value.map((_, index) =>
-                ['object', 'array'].includes(items.type as string) ? (
+                ['object', 'array'].includes(items.type as string) || items.format === 'text' ? (
                     <>
                         <div class="row">
                             <div class="col-sm-1">

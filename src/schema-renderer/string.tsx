@@ -1,12 +1,23 @@
+import type { JSX } from 'preact';
 import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
 
-export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTypeRendererProps) =>
-    schema.enum ? (
+export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTypeRendererProps) => {
+    const commonProps = {
+        pattern: schema.pattern,
+        required,
+        class: 'form-control form-control-sm',
+        id: elementIds.input,
+        value: objectStore.useTracked.getForPath(path),
+        onChange: (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            objectStore.set.setForPath(path, e.currentTarget.value),
+    };
+
+    return schema.enum ? (
         <select
+            {...commonProps}
             class="form-select form-select-sm"
-            id={elementIds.input}
-            required={required}
+            value={undefined}
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,
@@ -22,14 +33,9 @@ export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTyp
                 </option>
             ))}
         </select>
+    ) : schema.format === 'text' ? (
+        <textarea {...commonProps} rows={5} />
     ) : (
-        <input
-            type="text"
-            pattern={schema.pattern}
-            required={required}
-            class="form-control form-control-sm"
-            id={elementIds.input}
-            value={objectStore.useTracked.getForPath(path)}
-            onChange={(e) => objectStore.set.setForPath(path, e.currentTarget.value)}
-        />
+        <input {...commonProps} type="text" />
     );
+};
