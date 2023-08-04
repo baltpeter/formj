@@ -15,7 +15,7 @@ export type FormProps = {
 export const Form = ({ schema, ...props }: FormProps) => {
     useEffect(() => {
         objectStore.set.object(emtpyDefaultForJsonSchema(schema) as Record<string, unknown>);
-    }, []);
+    }, [schema]);
 
     const rootId = props.id || `formj-${hash(schema)}`;
 

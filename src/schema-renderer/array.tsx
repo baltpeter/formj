@@ -15,7 +15,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
     const buttons = ({ index, clazz }: { index: number; clazz: string }) => (
         <>
             <button
-                class={clazz}
+                className={clazz}
                 type="button"
                 title="Delete this item"
                 onClick={() =>
@@ -24,23 +24,23 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                         value.filter((_, i) => i !== index)
                     )
                 }>
-                <i class="bi-trash"></i>
+                <i className="bi-trash" />
             </button>
             <button
-                class={clazz}
+                className={clazz}
                 type="button"
                 title="Move this item up"
                 disabled={index === 0}
                 onClick={() => objectStore.set.setForPath(props.path, swapElements(value, index, index - 1))}>
-                <i class="bi-arrow-up"></i>
+                <i className="bi-arrow-up" />
             </button>
             <button
-                class={clazz}
+                className={clazz}
                 type="button"
                 title="Move this item down"
                 disabled={index === value.length - 1}
                 onClick={() => objectStore.set.setForPath(props.path, swapElements(value, index, index + 1))}>
-                <i class="bi-arrow-down"></i>
+                <i className="bi-arrow-down" />
             </button>
         </>
     );
@@ -50,13 +50,13 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
             {value.map((_, index) =>
                 ['object', 'array'].includes(items.type as string) || items.format === 'text' ? (
                     <>
-                        <div class="row">
-                            <div class="col-sm-1">
-                                <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                        <div className="row">
+                            <div className="col-sm-1">
+                                <div className="btn-group-vertical" role="group" aria-label="Vertical button group">
                                     {buttons({ index, clazz: 'btn btn-sm btn-outline-secondary' })}
                                 </div>
                             </div>
-                            <div class="col-sm">
+                            <div className="col-sm">
                                 <SchemaRenderer
                                     id={`${props.id}-${index}`}
                                     path={`${props.path}.${index}`}
@@ -69,7 +69,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                         </div>
                     </>
                 ) : (
-                    <div class="input-group input-group-sm mb-3">
+                    <div className="input-group input-group-sm mb-3">
                         {buttons({ index, clazz: 'btn btn-outline-secondary' })}
                         <SchemaRenderer
                             id={`${props.id}-${index}`}
@@ -84,7 +84,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
 
             <button
                 type="button"
-                class="btn btn-primary btn-sm"
+                className="btn btn-primary btn-sm"
                 onClick={() => objectStore.set.setForPath(props.path, [...value, emtpyDefaultForJsonSchema(items)])}>
                 Add item
             </button>

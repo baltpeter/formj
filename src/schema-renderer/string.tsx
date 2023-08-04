@@ -25,7 +25,7 @@ export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTyp
     return schema.enum ? (
         <select
             {...commonProps}
-            class="form-select form-select-sm"
+            className="form-select form-select-sm"
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,

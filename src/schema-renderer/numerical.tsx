@@ -10,7 +10,7 @@ const NumericalRenderer = ({
 }: SchemaTypeRendererProps & { step: 'any' | number }) =>
     schema.enum ? (
         <select
-            class="form-select form-select-sm"
+            className="form-select form-select-sm"
             id={elementIds.input}
             required={required}
             value={objectStore.useTracked.getForPath(path)}
@@ -32,7 +32,7 @@ const NumericalRenderer = ({
             type="number"
             step={step}
             required={required}
-            class="form-control form-control-sm"
+            className="form-control form-control-sm"
             id={elementIds.input}
             value={objectStore.useTracked.getForPath(path)}
             // We can't use `onChange` here because that makes it impossible to enter fractional numbers.

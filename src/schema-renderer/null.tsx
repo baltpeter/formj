@@ -1,1 +1,1 @@
-export const NullRenderer = () => <div class="form-control form-control-sm">null</div>;
+export const NullRenderer = () => <div className="form-control form-control-sm">null</div>;

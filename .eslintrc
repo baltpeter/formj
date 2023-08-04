@@ -1,6 +1,6 @@
 {
     "root": true,
-    "extends": ["@baltpeter/eslint-config"],
+    "extends": ["@baltpeter/eslint-config/preact"],
     "rules": {
         "no-console": "error"
     }

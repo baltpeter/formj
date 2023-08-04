@@ -42,7 +42,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof schema === 'boolean') return <></>;
 
     const type = schema.type;
-    const elementIds = { row: props.id, input: props.id + '-input' };
+    const elementIds = { row: props.id, input: `${props.id}-input` };
 
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
@@ -61,20 +61,20 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
 
         if (schema.title && props.path !== '$')
             return (
-                <div id={elementIds.row} class="row mb-3">
-                    <label for={elementIds.input} class="col-sm-3 col-form-label col-form-label-sm">
+                <div id={elementIds.row} className="row mb-3">
+                    <label for={elementIds.input} className="col-sm-3 col-form-label col-form-label-sm">
                         {schema.title}
                         {props.required && (
-                            <span class="text-danger" title="required">
+                            <span className="text-danger" title="required">
                                 {' '}
                                 *
                             </span>
                         )}
                         {schema.description && (
-                            <i class="bi bi-info-circle" style="margin-left: 5px;" title={schema.description} />
+                            <i className="bi bi-info-circle" style="margin-left: 5px;" title={schema.description} />
                         )}
                     </label>
-                    <div class="col-sm">{input}</div>
+                    <div className="col-sm">{input}</div>
                 </div>
             );
         return input;
