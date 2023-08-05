@@ -12,6 +12,7 @@ export const ObjectRenderer = ({ schema, ...props }: SchemaTypeRendererProps) =>
                     path={`${props.path}.${id}`}
                     schema={subschema}
                     required={!!schema.required?.includes(id)}
+                    errors={props.errors}
                 />
             ))}
         </>

@@ -1,3 +1,4 @@
+import c from 'classnames';
 import { objectStore } from '../store';
 import { emtpyDefaultForJsonSchema, swapElements } from '../util';
 import type { SchemaTypeRendererProps } from './index';
@@ -64,6 +65,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                                     // TODO: I don't think this is correct, but I don't see what the correct behavior
                                     // should be, either.
                                     required={false}
+                                    errors={props.errors}
                                 />
                             </div>
                         </div>
@@ -77,6 +79,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                             schema={items}
                             // TODO: See above.
                             required={false}
+                            errors={props.errors}
                         />
                     </div>
                 )
@@ -84,7 +87,11 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
 
             <button
                 type="button"
-                className="btn btn-primary btn-sm"
+                className={c('btn', 'btn-sm', {
+                    'is-invalid': props.hasError,
+                    'btn-primary': !props.hasError,
+                    'btn-danger': props.hasError,
+                })}
                 onClick={() => objectStore.set.setForPath(props.path, [...value, emtpyDefaultForJsonSchema(items)])}>
                 Add item
             </button>

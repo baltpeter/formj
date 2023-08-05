@@ -1,3 +1,4 @@
+import c from 'classnames';
 import type { JSX } from 'preact';
 import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
@@ -11,11 +12,11 @@ const formatToType = {
     time: 'time',
 };
 
-export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTypeRendererProps) => {
+export const StringRenderer = ({ path, elementIds, schema, required, hasError }: SchemaTypeRendererProps) => {
     const commonProps = {
         pattern: schema.pattern,
         required,
-        class: 'form-control form-control-sm',
+        className: c('form-control', 'form-control-sm', { 'is-invalid': hasError }),
         id: elementIds.input,
         value: objectStore.useTracked.getForPath(path),
         onChange: (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -25,7 +26,7 @@ export const StringRenderer = ({ path, elementIds, schema, required }: SchemaTyp
     return schema.enum ? (
         <select
             {...commonProps}
-            className="form-select form-select-sm"
+            className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
             onChange={(e) =>
                 objectStore.set.setForPath(
                     path,
