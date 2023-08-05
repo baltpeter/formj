@@ -1,3 +1,4 @@
+import c from 'classnames';
 import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
 
@@ -7,10 +8,11 @@ const NumericalRenderer = ({
     schema,
     step,
     required,
+    hasError,
 }: SchemaTypeRendererProps & { step: 'any' | number }) =>
     schema.enum ? (
         <select
-            className="form-select form-select-sm"
+            className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
             required={required}
             value={objectStore.useTracked.getForPath(path)}
@@ -32,7 +34,7 @@ const NumericalRenderer = ({
             type="number"
             step={step}
             required={required}
-            className="form-control form-control-sm"
+            className={c('form-control', 'form-control-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
             value={objectStore.useTracked.getForPath(path)}
             // We can't use `onChange` here because that makes it impossible to enter fractional numbers.

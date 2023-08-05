@@ -13,6 +13,8 @@ export type SchemaRendererProps = {
     path: string;
 
     required: boolean;
+
+    errors: { path: string; message: string }[];
 };
 
 export type SchemaTypeRendererProps = {
@@ -25,6 +27,9 @@ export type SchemaTypeRendererProps = {
         row: string;
         input: string;
     };
+
+    hasError: boolean;
+    errors: { path: string; message: string }[];
 };
 
 const schemaTypeRenderers = {
@@ -44,18 +49,25 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     const type = schema.type;
     const elementIds = { row: props.id, input: `${props.id}-input` };
 
+    const error = props.errors.find((e) => e.path === props.path);
+
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
     if (type in schemaTypeRenderers) {
         const SchemaTypeRenderer = schemaTypeRenderers[type];
         const input = (
-            <SchemaTypeRenderer
-                schema={schema}
-                id={props.id}
-                path={props.path}
-                elementIds={elementIds}
-                required={props.required}
-            />
+            <>
+                <SchemaTypeRenderer
+                    schema={schema}
+                    id={props.id}
+                    path={props.path}
+                    elementIds={elementIds}
+                    required={props.required}
+                    hasError={!!error}
+                    errors={props.errors}
+                />
+                {error && <div className="invalid-feedback">{error.message}</div>}
+            </>
         );
 
         if (schema.title && props.path !== '$')

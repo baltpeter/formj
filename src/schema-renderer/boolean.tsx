@@ -1,3 +1,4 @@
+import c from 'classnames';
 import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
 
@@ -7,12 +8,12 @@ const values = [
     { value: false, label: 'false' },
 ];
 
-export const BooleanRenderer = ({ path, elementIds, schema, required }: SchemaTypeRendererProps) => {
+export const BooleanRenderer = ({ path, elementIds, schema, required, hasError }: SchemaTypeRendererProps) => {
     const value = objectStore.useTracked.getForPath(path);
 
     return (
         <select
-            className="form-select form-select-sm"
+            className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
             required={required}
             value={value}
