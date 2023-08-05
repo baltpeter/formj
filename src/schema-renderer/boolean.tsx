@@ -25,6 +25,7 @@ export const BooleanRenderer = ({ path, elementIds, schema, required }: SchemaTy
                         !schema.enum ||
                         schema.enum.includes(v.value as boolean) ||
                         (v.value === undefined && value === undefined) ||
+                        (v.value === undefined && !required) ||
                         value === v.value
                 )
                 .map(({ value: v, label }) => (

@@ -27,7 +27,7 @@ export type SchemaTypeRendererProps = {
     };
 };
 
-const schemaTypeRenderers: Record<string, FunctionComponent<SchemaTypeRendererProps>> = {
+const schemaTypeRenderers = {
     object: ObjectRenderer,
     array: ArrayRenderer,
 
@@ -36,7 +36,7 @@ const schemaTypeRenderers: Record<string, FunctionComponent<SchemaTypeRendererPr
     integer: IntegerRenderer,
     boolean: BooleanRenderer,
     null: NullRenderer,
-};
+} satisfies Record<string, FunctionComponent<SchemaTypeRendererProps>>;
 
 export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof schema === 'boolean') return <></>;
@@ -47,8 +47,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
     if (type in schemaTypeRenderers) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const SchemaTypeRenderer = schemaTypeRenderers[type as 'object']!;
+        const SchemaTypeRenderer = schemaTypeRenderers[type];
         const input = (
             <SchemaTypeRenderer
                 schema={schema}
