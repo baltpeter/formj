@@ -1,22 +1,16 @@
 import { AggregateAjvError } from '@segment/ajv-human-errors';
-import type { AjvError as _AjvError } from '@segment/ajv-human-errors/dist/cjs/aggregate-ajv-error';
 import Ajv from 'ajv';
 import hash from 'hash-it';
 import type { JSONSchema7Definition } from 'json-schema';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { SchemaRenderer } from './schema-renderer';
+import { SchemaRenderer, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
-import { emtpyDefaultForJsonSchema } from './util';
-
-export type AjvError = _AjvError & {
-    /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
-    path?: string;
-};
+import { emtpyDefaultForJsonSchema, jsonPointerToPath } from './util';
 
 export type FormSubmittedEvent = {
     event: 'submitted';
     object: unknown;
-    ajvResult: boolean | AjvError[];
+    ajvResult: true | ValidationError[];
 };
 export type FormChangedEvent = {
     event: 'changed';
@@ -24,7 +18,7 @@ export type FormChangedEvent = {
     oldObject: unknown;
 };
 export type FormApi = {
-    validate: () => boolean | AjvError[];
+    validate: () => true | ValidationError[];
     submit: () => void;
 };
 export type FormProps = {
@@ -32,6 +26,7 @@ export type FormProps = {
     schema: JSONSchema7Definition;
 
     customAjv?: Ajv;
+    customValidators?: ((obj: Record<string, unknown>) => true | ValidationError[])[];
 
     onSubmit?: (formData: FormSubmittedEvent) => void;
     onChange?: (formData: FormChangedEvent) => void;
@@ -45,7 +40,7 @@ export const Form = ({ schema, ...props }: FormProps) => {
 
     const ajv = useMemo(() => props.customAjv || new Ajv(), [props.customAjv]);
     const ajvSchema = useMemo(() => ajv.compile(schema), [ajv, schema]);
-    const [ajvSchemaErrors, setAjvSchemaErrors] = useState<AjvError[]>([]);
+    const [ajvSchemaErrors, setAjvSchemaErrors] = useState<ValidationError[]>([]);
 
     const formApi: FormApi = {
         validate: () => {
@@ -54,20 +49,28 @@ export const Form = ({ schema, ...props }: FormProps) => {
 
             // I initially used `[...new AggregateAjvError(…)]` here but the way microbundle transpiled that broke
             // the functionality.
-            const errors = Array.from(
+            const ajvErrors = Array.from(
                 new AggregateAjvError(ajvSchema.errors || [], {
                     fieldLabels: 'js',
                     includeData: true,
                     includeOriginalError: true,
                 })
             ).map((e) => {
-                const path = e.pointer === '' ? '$' : '$.' + e.pointer.substring(1).replace(/\//g, '.');
+                const path = jsonPointerToPath(e.pointer);
 
                 if (e.original?.keyword === 'required' && e.original?.params?.['missingProperty'])
                     e.path = path + '.' + e.original.params['missingProperty'];
                 else e.path = path;
                 return e;
             });
+
+            const customErrors =
+                props.customValidators
+                    ?.map((v) => v(objectStore.get.object()))
+                    .filter((r): r is ValidationError[] => r !== true)
+                    .flat() || [];
+
+            const errors = [...ajvErrors, ...customErrors];
             setAjvSchemaErrors(errors);
             return errors;
         },
