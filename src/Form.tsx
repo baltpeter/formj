@@ -45,7 +45,10 @@ export const Form = ({ schema, ...props }: FormProps) => {
     const formApi: FormApi = {
         validate: () => {
             const passed = ajvSchema(objectStore.get.object());
-            if (passed) return true;
+            if (passed) {
+                setAjvSchemaErrors([]);
+                return true;
+            }
 
             // I initially used `[...new AggregateAjvError(…)]` here but the way microbundle transpiled that broke
             // the functionality.
