@@ -52,13 +52,15 @@ export const Form = ({ schema, ...props }: FormProps) => {
             const passed = ajvSchema(objectStore.get.object());
             if (passed) return true;
 
-            const errors = [
-                ...new AggregateAjvError(ajvSchema.errors || [], {
+            // I initially used `[...new AggregateAjvError(…)]` here but the way microbundle transpiled that broke
+            // the functionality.
+            const errors = Array.from(
+                new AggregateAjvError(ajvSchema.errors || [], {
                     fieldLabels: 'js',
                     includeData: true,
                     includeOriginalError: true,
-                }),
-            ].map((e) => {
+                })
+            ).map((e) => {
                 const path = e.pointer === '' ? '$' : '$.' + e.pointer.substring(1).replace(/\//g, '.');
 
                 if (e.original?.keyword === 'required' && e.original?.params?.['missingProperty'])
