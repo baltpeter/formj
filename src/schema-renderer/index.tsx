@@ -7,6 +7,12 @@ import { IntegerRenderer, NumberRenderer } from './numerical';
 import { ObjectRenderer } from './object';
 import { StringRenderer } from './string';
 
+export type ValidationError = {
+    /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
+    path: string;
+    message: string;
+};
+
 export type SchemaRendererProps = {
     schema: JSONSchema7Definition;
     id: string;
@@ -14,7 +20,7 @@ export type SchemaRendererProps = {
 
     required: boolean;
 
-    errors: { path: string; message: string }[];
+    errors: ValidationError[];
 };
 
 export type SchemaTypeRendererProps = {
@@ -29,7 +35,7 @@ export type SchemaTypeRendererProps = {
     };
 
     hasError: boolean;
-    errors: { path: string; message: string }[];
+    errors: ValidationError[];
 };
 
 const schemaTypeRenderers = {
@@ -49,7 +55,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     const type = schema.type;
     const elementIds = { row: props.id, input: `${props.id}-input` };
 
-    const error = props.errors.find((e) => e.path === props.path);
+    const errors = props.errors.filter((e) => e.path === props.path);
 
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
@@ -63,10 +69,12 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                     path={props.path}
                     elementIds={elementIds}
                     required={props.required}
-                    hasError={!!error}
+                    hasError={errors.length > 0}
                     errors={props.errors}
                 />
-                {error && <div className="invalid-feedback">{error.message}</div>}
+                {errors.map((error) => (
+                    <div className="invalid-feedback">{error.message}</div>
+                ))}
             </>
         );
 
