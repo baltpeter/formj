@@ -7,42 +7,53 @@ import { SchemaRenderer, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
 import { emtpyDefaultForJsonSchema, jsonPointerToPath } from './util';
 
-export type FormSubmittedEvent = {
+export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
-    object: unknown;
+    object: ObjT;
     ajvResult: true | ValidationError[];
 };
-export type FormChangedEvent = {
+export type FormChangedEvent<ObjT> = {
     event: 'changed';
-    object: unknown;
-    oldObject: unknown;
+    object: ObjT;
+    oldObject: ObjT;
 };
-export type FormApi = {
+export type FormApi<ObjT> = {
+    overrideObject: (newObj: ObjT) => void;
     validate: () => true | ValidationError[];
     submit: () => void;
 };
-export type FormProps = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>> = {
     id?: string;
     schema: JSONSchema7Definition;
+    initialData?: ObjT;
 
     customAjv?: Ajv;
-    customValidators?: ((obj: Record<string, unknown>) => true | ValidationError[])[];
+    customValidators?: ((obj: ObjT) => true | ValidationError[])[];
 
-    onSubmit?: (formData: FormSubmittedEvent) => void;
-    onChange?: (formData: FormChangedEvent) => void;
-    formApiRef?: { current: FormApi | null };
+    onSubmit?: (formData: FormSubmittedEvent<ObjT>) => void;
+    onChange?: (formData: FormChangedEvent<ObjT>) => void;
+    formApiRef?: { current: FormApi<ObjT> | null };
 };
 
-export const Form = ({ schema, ...props }: FormProps) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: FormProps<ObjT>) => {
     useEffect(() => {
-        objectStore.set.object(emtpyDefaultForJsonSchema(schema) as Record<string, unknown>);
+        objectStore.set.object(
+            props.initialData !== undefined
+                ? props.initialData
+                : (emtpyDefaultForJsonSchema(schema) as Record<string, unknown>)
+        );
+        // We deliberately _don't_ want to update when `initialData` changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [schema]);
 
     const ajv = useMemo(() => props.customAjv || new Ajv(), [props.customAjv]);
     const ajvSchema = useMemo(() => ajv.compile(schema), [ajv, schema]);
     const [ajvSchemaErrors, setAjvSchemaErrors] = useState<ValidationError[]>([]);
 
-    const formApi: FormApi = {
+    const formApi: FormApi<ObjT> = {
+        overrideObject: (newObj) => objectStore.set.object(newObj),
         validate: () => {
             const passed = ajvSchema(objectStore.get.object());
             if (passed) {
@@ -69,7 +80,7 @@ export const Form = ({ schema, ...props }: FormProps) => {
 
             const customErrors =
                 props.customValidators
-                    ?.map((v) => v(objectStore.get.object()))
+                    ?.map((v) => v(objectStore.get.object() as ObjT))
                     .filter((r): r is ValidationError[] => r !== true)
                     .flat() || [];
 
@@ -79,13 +90,13 @@ export const Form = ({ schema, ...props }: FormProps) => {
         },
         submit: () => {
             const ajvResult = formApi.validate();
-            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object(), ajvResult });
+            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object() as ObjT, ajvResult });
         },
     };
 
     if (props.onChange)
         objectStore.useStore.subscribe((state, prevState) =>
-            props.onChange?.({ event: 'changed', object: state.object, oldObject: prevState.object })
+            props.onChange?.({ event: 'changed', object: state.object as ObjT, oldObject: prevState.object as ObjT })
         );
     if (props.formApiRef) props.formApiRef.current = formApi;
 
