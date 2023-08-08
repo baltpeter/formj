@@ -1,6 +1,6 @@
 import c from 'classnames';
 import { objectStore } from '../store';
-import { emtpyDefaultForJsonSchema, swapElements } from '../util';
+import { emptyDefaultForJsonSchema, swapElements } from '../util';
 import type { SchemaTypeRendererProps } from './index';
 import { SchemaRenderer } from './index';
 
@@ -99,7 +99,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                     'btn-primary': !props.hasError,
                     'btn-danger': props.hasError,
                 })}
-                onClick={() => objectStore.set.setForPath(props.path, [...value, emtpyDefaultForJsonSchema(items)])}>
+                onClick={() => objectStore.set.setForPath(props.path, [...value, emptyDefaultForJsonSchema(items)])}>
                 Add item
             </button>
         </>

@@ -5,7 +5,7 @@ import type { JSONSchema7Definition } from 'json-schema';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { SchemaRenderer, type FormHelper, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
-import { emtpyDefaultForJsonSchema, jsonPointerToPath } from './util';
+import { emptyDefaultForJsonSchema, jsonPointerToPath } from './util';
 
 export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
@@ -47,7 +47,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         objectStore.set.object(
             props.initialData !== undefined
                 ? props.initialData
-                : (emtpyDefaultForJsonSchema(schema) as Record<string, unknown>)
+                : (emptyDefaultForJsonSchema(schema) as Record<string, unknown>)
         );
         // We deliberately _don't_ want to update when `initialData` changes.
         // eslint-disable-next-line react-hooks/exhaustive-deps
