@@ -16,12 +16,16 @@ export type FormHelperButton = {
      * wildcards.
      */
     paths: string | string[];
+    enabled?: boolean;
+    hidden?: boolean;
     type: 'button';
     children: ComponentChildren;
     attributes: JSX.HTMLAttributes<HTMLButtonElement>;
 };
 export type FormHelperCustomAddon = {
     paths: string | string[];
+    enabled?: boolean;
+    hidden?: boolean;
     type: 'custom-addon';
     element: ComponentChildren;
 };
@@ -94,15 +98,16 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
             })
         )
-        .filter(
-            (h): h is FormHelperButton | FormHelperCustomAddon =>
-                ['button', 'custom-addon'].includes(h.type) && isMatch(props.path, h.paths)
-        )
+        .filter((h): h is FormHelperButton | FormHelperCustomAddon => ['button', 'custom-addon'].includes(h.type))
+        .filter((h) => h.enabled !== false)
+        .filter((h) => isMatch(props.path, h.paths))
         .map((h) =>
             h.type === 'custom-addon' ? (
-                h.element
+                <span className="input-group-text" hidden={h.hidden}>
+                    {h.element}
+                </span>
             ) : (
-                <button type="button" className="btn btn-outline-secondary" {...h.attributes}>
+                <button type="button" className="btn btn-outline-secondary" hidden={h.hidden} {...h.attributes}>
                     {h.children}
                 </button>
             )
