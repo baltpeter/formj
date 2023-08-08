@@ -18,7 +18,11 @@ export type FormHelper = {
     paths: string | string[];
     type: 'button';
     children: ComponentChildren;
-    attributes: (p: { value: unknown }) => JSX.HTMLAttributes<HTMLButtonElement>;
+    attributes: (p: {
+        path: string;
+        value: unknown;
+        setValue: (newValue: unknown) => void;
+    }) => JSX.HTMLAttributes<HTMLButtonElement>;
 };
 
 export type ValidationError = {
@@ -79,7 +83,11 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     const helperButtons = props.helpers
         .filter((h) => h.type === 'button' && isMatch(props.path, h.paths))
         .map((h) => ({
-            attributes: h.attributes({ value: objectStore.useTracked.getForPath(props.path) }),
+            attributes: h.attributes({
+                path: props.path,
+                value: objectStore.useTracked.getForPath(props.path),
+                setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
+            }),
             children: h.children,
         }))
         .map((h) =>
