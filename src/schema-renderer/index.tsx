@@ -1,11 +1,25 @@
+import c from 'classnames';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
-import type { FunctionComponent } from 'preact';
+import { isMatch } from 'matcher';
+import type { ComponentChildren, FunctionComponent, JSX } from 'preact';
+import { objectStore } from '../store';
 import { ArrayRenderer } from './array';
 import { BooleanRenderer } from './boolean';
 import { NullRenderer } from './null';
 import { IntegerRenderer, NumberRenderer } from './numerical';
 import { ObjectRenderer } from './object';
 import { StringRenderer } from './string';
+
+export type FormHelper = {
+    /**
+     * The path(s) to the fields that should get the helper in our format, e.g. `$.foo.1.bar`. These can include `*` as
+     * wildcards.
+     */
+    paths: string | string[];
+    type: 'button';
+    children: ComponentChildren;
+    attributes: (p: { value: unknown }) => JSX.HTMLAttributes<HTMLButtonElement>;
+};
 
 export type ValidationError = {
     /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
@@ -21,6 +35,8 @@ export type SchemaRendererProps = {
     required: boolean;
 
     errors: ValidationError[];
+
+    helpers: FormHelper[];
 };
 
 export type SchemaTypeRendererProps = {
@@ -36,6 +52,8 @@ export type SchemaTypeRendererProps = {
 
     hasError: boolean;
     errors: ValidationError[];
+
+    helpers: FormHelper[];
 };
 
 const schemaTypeRenderers = {
@@ -53,25 +71,64 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof schema === 'boolean') return <></>;
 
     const type = schema.type;
+    if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
+
     const elementIds = { row: props.id, input: `${props.id}-input` };
 
     const errors = props.errors.filter((e) => e.path === props.path);
-
-    if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
+    const helperButtons = props.helpers
+        .filter((h) => h.type === 'button' && isMatch(props.path, h.paths))
+        .map((h) => ({
+            attributes: h.attributes({ value: objectStore.useTracked.getForPath(props.path) }),
+            children: h.children,
+        }))
+        .map((h) =>
+            ['object', 'array'].includes(type) ? (
+                <button type="button" className="btn btn-outline-secondary" {...h.attributes}>
+                    {h.children}
+                </button>
+            ) : (
+                <button type="button" className="btn btn-outline-secondary" {...h.attributes}>
+                    {h.children}
+                </button>
+            )
+        );
 
     if (type in schemaTypeRenderers) {
         const SchemaTypeRenderer = schemaTypeRenderers[type];
+        const schemaTypeRenderer = (
+            <SchemaTypeRenderer
+                schema={schema}
+                id={props.id}
+                path={props.path}
+                elementIds={elementIds}
+                required={props.required}
+                hasError={errors.length > 0}
+                errors={props.errors}
+                helpers={props.helpers}
+            />
+        );
         const input = (
             <>
-                <SchemaTypeRenderer
-                    schema={schema}
-                    id={props.id}
-                    path={props.path}
-                    elementIds={elementIds}
-                    required={props.required}
-                    hasError={errors.length > 0}
-                    errors={props.errors}
-                />
+                {helperButtons.length > 0 ? (
+                    ['object', 'array'].includes(type) ? (
+                        <>
+                            {schemaTypeRenderer}
+
+                            <div className={c('btn-group', 'btn-group-sm', { 'mb-3': type === 'object' })} role="group">
+                                {helperButtons}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="input-group input-group-sm">
+                            {schemaTypeRenderer}
+                            {helperButtons}
+                        </div>
+                    )
+                ) : (
+                    schemaTypeRenderer
+                )}
+
                 {errors.map((error) => (
                     <div className="invalid-feedback">{error.message}</div>
                 ))}
