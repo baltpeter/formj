@@ -10,7 +10,7 @@ import { IntegerRenderer, NumberRenderer } from './numerical';
 import { ObjectRenderer } from './object';
 import { StringRenderer } from './string';
 
-export type FormHelper = {
+export type FormHelperButton = {
     /**
      * The path(s) to the fields that should get the helper in our format, e.g. `$.foo.1.bar`. These can include `*` as
      * wildcards.
@@ -18,12 +18,18 @@ export type FormHelper = {
     paths: string | string[];
     type: 'button';
     children: ComponentChildren;
-    attributes: (p: {
-        path: string;
-        value: unknown;
-        setValue: (newValue: unknown) => void;
-    }) => JSX.HTMLAttributes<HTMLButtonElement>;
+    attributes: JSX.HTMLAttributes<HTMLButtonElement>;
 };
+export type FormHelperCustomAddon = {
+    paths: string | string[];
+    type: 'custom-addon';
+    element: ComponentChildren;
+};
+export type FormHelper = (p: {
+    path: string;
+    value: unknown;
+    setValue: (newValue: unknown) => void;
+}) => FormHelperButton | FormHelperCustomAddon;
 
 export type ValidationError = {
     /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
@@ -81,20 +87,20 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
 
     const errors = props.errors.filter((e) => e.path === props.path);
     const helperButtons = props.helpers
-        .filter((h) => h.type === 'button' && isMatch(props.path, h.paths))
-        .map((h) => ({
-            attributes: h.attributes({
+        .map((h) =>
+            h({
                 path: props.path,
                 value: objectStore.useTracked.getForPath(props.path),
                 setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
-            }),
-            children: h.children,
-        }))
+            })
+        )
+        .filter(
+            (h): h is FormHelperButton | FormHelperCustomAddon =>
+                ['button', 'custom-addon'].includes(h.type) && isMatch(props.path, h.paths)
+        )
         .map((h) =>
-            ['object', 'array'].includes(type) ? (
-                <button type="button" className="btn btn-outline-secondary" {...h.attributes}>
-                    {h.children}
-                </button>
+            h.type === 'custom-addon' ? (
+                h.element
             ) : (
                 <button type="button" className="btn btn-outline-secondary" {...h.attributes}>
                     {h.children}
