@@ -52,11 +52,17 @@ export type FormHelperEventHandler = {
       }
 );
 export type FormHelperEventHandlerType = FormHelperEventHandler['event'];
+export type FormHelperSuggestor = {
+    paths: string | string[];
+    enabled?: boolean;
+    type: 'suggestions';
+    suggestions: () => unknown[];
+};
 export type FormHelper = (p: {
     path: string;
     value: unknown;
     setValue: (newValue: unknown) => void;
-}) => FormHelperButton | FormHelperCustomAddon | FormHelperEventHandler;
+}) => FormHelperButton | FormHelperCustomAddon | FormHelperEventHandler | FormHelperSuggestor;
 
 export type ValidationError = {
     /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
@@ -112,19 +118,21 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
     const elementIds = { row: props.id, input: `${props.id}-input` };
+    const value = objectStore.useTracked.getForPath(props.path);
 
     const errors = props.errors.filter((e) => e.path === props.path);
-    const helpers = props.helpers.map((h) =>
-        h({
-            path: props.path,
-            value: objectStore.useTracked.getForPath(props.path),
-            setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
-        })
-    );
+    const helpers = props.helpers
+        .map((h) =>
+            h({
+                path: props.path,
+                value,
+                setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
+            })
+        )
+        .filter((h) => h.enabled !== false)
+        .filter((h) => isMatch(props.path, h.paths));
     const helperButtons = helpers
         .filter((h): h is FormHelperButton | FormHelperCustomAddon => ['button', 'custom-addon'].includes(h.type))
-        .filter((h) => h.enabled !== false)
-        .filter((h) => isMatch(props.path, h.paths))
         .map((h) =>
             h.type === 'custom-addon' ? (
                 <span className="input-group-text" hidden={h.hidden}>
@@ -139,8 +147,6 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     const eventHandlers = Object.entries(
         helpers
             .filter((h): h is FormHelperEventHandler => h.type === 'event-handler')
-            .filter((h) => h.enabled !== false)
-            .filter((h) => isMatch(props.path, h.paths))
             .reduce<Partial<Record<FormHelperEventHandlerType, FormHelperEventHandler['handler'][]>>>((acc, h) => {
                 if (acc[h.event] === undefined) acc[h.event] = [];
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -157,6 +163,10 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
         }),
         {}
     );
+    const suggestions = helpers
+        .filter((h): h is FormHelperSuggestor => h.type === 'suggestions')
+        .flatMap((h) => h.suggestions())
+        .filter((s) => s !== undefined && s !== value);
 
     if (type in schemaTypeRenderers) {
         const SchemaTypeRenderer = schemaTypeRenderers[type];
@@ -197,6 +207,25 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 {errors.map((error) => (
                     <div className="invalid-feedback">{error.message}</div>
                 ))}
+                {suggestions.length > 0 && (
+                    <div className="form-text">
+                        Suggestions:{' '}
+                        {suggestions.map((s, i) => (
+                            <>
+                                <button
+                                    className="btn btn-sm btn-link"
+                                    style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0;"
+                                    title={`Apply suggestion: ${typeof s === 'string' ? s : JSON.stringify(s)}`}
+                                    onClick={() => objectStore.set.setForPath(props.path, s)}>
+                                    <span className="formj-suggestion">
+                                        {typeof s === 'string' ? s : JSON.stringify(s)}
+                                    </span>
+                                </button>
+                                {i < suggestions.length - 1 && ', '}
+                            </>
+                        ))}
+                    </div>
+                )}
             </>
         );
 
