@@ -8,7 +8,14 @@ const values = [
     { value: false, label: 'false' },
 ];
 
-export const BooleanRenderer = ({ path, elementIds, schema, required, hasError }: SchemaTypeRendererProps) => {
+export const BooleanRenderer = ({
+    path,
+    elementIds,
+    schema,
+    required,
+    hasError,
+    eventHandlers,
+}: SchemaTypeRendererProps) => {
     const value = objectStore.useTracked.getForPath(path);
 
     return (
@@ -17,9 +24,11 @@ export const BooleanRenderer = ({ path, elementIds, schema, required, hasError }
             id={elementIds.input}
             required={required}
             value={value}
-            onChange={(e) =>
-                objectStore.set.setForPath(path, { true: true, false: false, undefined }[e.currentTarget.value])
-            }>
+            {...eventHandlers}
+            onChange={(e) => {
+                objectStore.set.setForPath(path, { true: true, false: false, undefined }[e.currentTarget.value]);
+                eventHandlers.onChange?.(e);
+            }}>
             {values
                 .filter(
                     (v) =>

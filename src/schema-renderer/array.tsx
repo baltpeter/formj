@@ -1,6 +1,6 @@
 import c from 'classnames';
 import { objectStore } from '../store';
-import { emtpyDefaultForJsonSchema, swapElements } from '../util';
+import { emptyDefaultForJsonSchema, swapElements } from '../util';
 import type { SchemaTypeRendererProps } from './index';
 import { SchemaRenderer } from './index';
 
@@ -66,12 +66,18 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                                     // should be, either.
                                     required={false}
                                     errors={props.errors}
+                                    helpers={props.helpers}
                                 />
                             </div>
                         </div>
                     </>
                 ) : (
-                    <div className="input-group input-group-sm mb-3">
+                    <div
+                        className="input-group input-group-sm mb-3"
+                        // This is an ugly workaround. If a array element has helper buttons, we are wrapping it in two
+                        // `input-group`s (and I can't think of a clean way not to). This causes them to still render
+                        // correctly.
+                        style="flex-wrap: unset;">
                         {buttons({ index, clazz: 'btn btn-outline-secondary' })}
                         <SchemaRenderer
                             id={`${props.id}-${index}`}
@@ -80,6 +86,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                             // TODO: See above.
                             required={false}
                             errors={props.errors}
+                            helpers={props.helpers}
                         />
                     </div>
                 )
@@ -87,12 +94,12 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
 
             <button
                 type="button"
-                className={c('btn', 'btn-sm', {
+                className={c('btn', 'btn-sm', 'me-2', {
                     'is-invalid': props.hasError,
                     'btn-primary': !props.hasError,
                     'btn-danger': props.hasError,
                 })}
-                onClick={() => objectStore.set.setForPath(props.path, [...value, emtpyDefaultForJsonSchema(items)])}>
+                onClick={() => objectStore.set.setForPath(props.path, [...value, emptyDefaultForJsonSchema(items)])}>
                 Add item
             </button>
         </>

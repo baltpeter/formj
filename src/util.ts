@@ -8,7 +8,7 @@ export const swapElements = <T>(array: T[], i: number, j: number): T[] => {
     return arrayCopy;
 };
 
-export const emtpyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
+export const emptyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
     if (typeof schema === 'boolean') return schema;
 
     if (schema.default !== undefined) return schema.default;
@@ -16,7 +16,7 @@ export const emtpyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
     if (schema.type === 'object') {
         const object: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(schema.properties ?? {}))
-            object[key] = emtpyDefaultForJsonSchema(value);
+            object[key] = emptyDefaultForJsonSchema(value);
         return object;
     }
     if (schema.type === 'null') return null;

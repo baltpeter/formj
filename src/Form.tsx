@@ -3,9 +3,9 @@ import Ajv from 'ajv';
 import hash from 'hash-it';
 import type { JSONSchema7Definition } from 'json-schema';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { SchemaRenderer, type ValidationError } from './schema-renderer';
+import { SchemaRenderer, type FormHelper, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
-import { emtpyDefaultForJsonSchema, jsonPointerToPath } from './util';
+import { emptyDefaultForJsonSchema, jsonPointerToPath } from './util';
 
 export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
@@ -19,6 +19,9 @@ export type FormChangedEvent<ObjT> = {
 };
 export type FormApi<ObjT> = {
     overrideObject: (newObj: ObjT) => void;
+    get: (path: string) => unknown;
+    set: (path: string, value: unknown) => void;
+
     validate: () => true | ValidationError[];
     submit: () => void;
 };
@@ -27,6 +30,8 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
     id?: string;
     schema: JSONSchema7Definition;
     initialData?: ObjT;
+
+    helpers?: FormHelper[];
 
     customAjv?: Ajv;
     customValidators?: ((obj: ObjT) => true | ValidationError[])[];
@@ -42,7 +47,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         objectStore.set.object(
             props.initialData !== undefined
                 ? props.initialData
-                : (emtpyDefaultForJsonSchema(schema) as Record<string, unknown>)
+                : (emptyDefaultForJsonSchema(schema) as Record<string, unknown>)
         );
         // We deliberately _don't_ want to update when `initialData` changes.
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,6 +59,9 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
 
     const formApi: FormApi<ObjT> = {
         overrideObject: (newObj) => objectStore.set.object(newObj),
+        get: (path) => objectStore.get.getForPath(path),
+        set: (path, value) => objectStore.set.setForPath(path, value),
+
         validate: () => {
             const passed = ajvSchema(objectStore.get.object());
             if (passed) {
@@ -103,7 +111,14 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
     const rootId = props.id || `formj-${hash(schema)}`;
     return (
         <form id={rootId} noValidate>
-            <SchemaRenderer schema={schema} id={rootId} path="$" required={false} errors={ajvSchemaErrors} />
+            <SchemaRenderer
+                schema={schema}
+                id={rootId}
+                path="$"
+                required={false}
+                errors={ajvSchemaErrors}
+                helpers={props.helpers || []}
+            />
         </form>
     );
 };

@@ -12,27 +12,38 @@ const formatToType = {
     time: 'time',
 };
 
-export const StringRenderer = ({ path, elementIds, schema, required, hasError }: SchemaTypeRendererProps) => {
+export const StringRenderer = ({
+    path,
+    elementIds,
+    schema,
+    required,
+    hasError,
+    eventHandlers,
+}: SchemaTypeRendererProps) => {
     const commonProps = {
         pattern: schema.pattern,
         required,
         className: c('form-control', 'form-control-sm', { 'is-invalid': hasError }),
         id: elementIds.input,
         value: objectStore.useTracked.getForPath(path),
-        onChange: (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-            objectStore.set.setForPath(path, e.currentTarget.value),
+        ...eventHandlers,
+        onChange: (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            objectStore.set.setForPath(path, e.currentTarget.value);
+            eventHandlers.onChange?.(e);
+        },
     };
 
     return schema.enum ? (
         <select
             {...commonProps}
             className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
-            onChange={(e) =>
+            onChange={(e) => {
                 objectStore.set.setForPath(
                     path,
                     e.currentTarget.value === 'undefined' ? undefined : e.currentTarget.value
-                )
-            }>
+                );
+                eventHandlers.onChange?.(e);
+            }}>
             {[
                 ...(!required || objectStore.useTracked.getForPath(path) === undefined ? ['undefined'] : []),
                 ...schema.enum,
