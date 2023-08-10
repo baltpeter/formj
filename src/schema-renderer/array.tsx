@@ -51,7 +51,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
             {value.map((_, index) =>
                 ['object', 'array'].includes(items.type as string) || items.format === 'text' ? (
                     <>
-                        <div className="row">
+                        <div className="row mb-3">
                             <div className="col-sm-1">
                                 <div className="btn-group-vertical" role="group" aria-label="Vertical button group">
                                     {buttons({ index, clazz: 'btn btn-sm btn-outline-secondary' })}
