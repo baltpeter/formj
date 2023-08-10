@@ -44,10 +44,10 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: FormProps<ObjT>) => {
     useEffect(() => {
+        const emptyObject = emptyDefaultForJsonSchema(schema) as Record<string, unknown>;
+
         objectStore.set.object(
-            props.initialData !== undefined
-                ? props.initialData
-                : (emptyDefaultForJsonSchema(schema) as Record<string, unknown>)
+            props.initialData !== undefined ? { ...emptyObject, ...props.initialData } : emptyObject
         );
         // We deliberately _don't_ want to update when `initialData` changes.
         // eslint-disable-next-line react-hooks/exhaustive-deps
