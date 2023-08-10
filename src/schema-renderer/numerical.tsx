@@ -16,7 +16,7 @@ const NumericalRenderer = ({
             className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
             required={required}
-            value={objectStore.useTracked.getForPath(path)}
+            value={objectStore.useTracked.getForPath(path) ?? ''}
             {...eventHandlers}
             onChange={(e) => {
                 objectStore.set.setForPath(
@@ -39,7 +39,7 @@ const NumericalRenderer = ({
             required={required}
             className={c('form-control', 'form-control-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
-            value={objectStore.useTracked.getForPath(path)}
+            value={objectStore.useTracked.getForPath(path) ?? ''}
             {...eventHandlers}
             // We can't use `onChange` here because that makes it impossible to enter fractional numbers.
             onBlur={(e) => {
