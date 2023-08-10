@@ -20,12 +20,14 @@ export const StringRenderer = ({
     hasError,
     eventHandlers,
 }: SchemaTypeRendererProps) => {
+    const value = objectStore.useTracked.getForPath(path);
     const commonProps = {
         pattern: schema.pattern,
         required,
         className: c('form-control', 'form-control-sm', { 'is-invalid': hasError }),
         id: elementIds.input,
-        value: objectStore.useTracked.getForPath(path),
+        // See: https://github.com/baltpeter/formj/issues/5
+        value: value ?? '',
         ...eventHandlers,
         onChange: (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) => {
             objectStore.set.setForPath(path, e.currentTarget.value);
@@ -44,10 +46,7 @@ export const StringRenderer = ({
                 );
                 eventHandlers.onChange?.(e);
             }}>
-            {[
-                ...(!required || objectStore.useTracked.getForPath(path) === undefined ? ['undefined'] : []),
-                ...schema.enum,
-            ].map((v) => (
+            {[...(!required || value === undefined ? ['undefined'] : []), ...schema.enum].map((v) => (
                 <option value={v as number}>{v === 'undefined' ? '' : v}</option>
             ))}
         </select>
