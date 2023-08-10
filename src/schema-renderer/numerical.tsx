@@ -9,6 +9,7 @@ const NumericalRenderer = ({
     step,
     required,
     hasError,
+    eventHandlers,
 }: SchemaTypeRendererProps & { step: 'any' | number }) =>
     schema.enum ? (
         <select
@@ -16,12 +17,14 @@ const NumericalRenderer = ({
             id={elementIds.input}
             required={required}
             value={objectStore.useTracked.getForPath(path)}
-            onChange={(e) =>
+            {...eventHandlers}
+            onChange={(e) => {
                 objectStore.set.setForPath(
                     path,
                     e.currentTarget.value === 'undefined' ? undefined : +e.currentTarget.value
-                )
-            }>
+                );
+                eventHandlers.onChange?.(e);
+            }}>
             {[
                 ...(!required || objectStore.useTracked.getForPath(path) === undefined ? ['undefined'] : []),
                 ...schema.enum,
@@ -37,8 +40,12 @@ const NumericalRenderer = ({
             className={c('form-control', 'form-control-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
             value={objectStore.useTracked.getForPath(path)}
+            {...eventHandlers}
             // We can't use `onChange` here because that makes it impossible to enter fractional numbers.
-            onBlur={(e) => objectStore.set.setForPath(path, +e.currentTarget.value)}
+            onBlur={(e) => {
+                objectStore.set.setForPath(path, +e.currentTarget.value);
+                eventHandlers.onBlur?.(e);
+            }}
         />
     );
 

@@ -29,11 +29,34 @@ export type FormHelperCustomAddon = {
     type: 'custom-addon';
     element: ComponentChildren;
 };
+export type FormHelperEventHandler = {
+    paths: string | string[];
+    enabled?: boolean;
+    type: 'event-handler';
+} & (
+    | {
+          event: 'onKeyDown' | 'onKeyUp';
+          handler: (event: JSX.TargetedKeyboardEvent<EventTarget>) => void;
+      }
+    | {
+          event: 'onChange' | 'onInput';
+          handler: (event: JSX.TargetedEvent<EventTarget>) => void;
+      }
+    | {
+          event: 'onFocus' | 'onBlur';
+          handler: (event: JSX.TargetedFocusEvent<EventTarget>) => void;
+      }
+    | {
+          event: 'onClick' | 'onDblClick';
+          handler: (event: JSX.TargetedMouseEvent<EventTarget>) => void;
+      }
+);
+export type FormHelperEventHandlerType = FormHelperEventHandler['event'];
 export type FormHelper = (p: {
     path: string;
     value: unknown;
     setValue: (newValue: unknown) => void;
-}) => FormHelperButton | FormHelperCustomAddon;
+}) => FormHelperButton | FormHelperCustomAddon | FormHelperEventHandler;
 
 export type ValidationError = {
     /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
@@ -68,6 +91,7 @@ export type SchemaTypeRendererProps = {
     errors: ValidationError[];
 
     helpers: FormHelper[];
+    eventHandlers: Partial<Record<FormHelperEventHandlerType, (e: unknown) => void>>;
 };
 
 const schemaTypeRenderers = {
@@ -90,14 +114,14 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     const elementIds = { row: props.id, input: `${props.id}-input` };
 
     const errors = props.errors.filter((e) => e.path === props.path);
-    const helperButtons = props.helpers
-        .map((h) =>
-            h({
-                path: props.path,
-                value: objectStore.useTracked.getForPath(props.path),
-                setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
-            })
-        )
+    const helpers = props.helpers.map((h) =>
+        h({
+            path: props.path,
+            value: objectStore.useTracked.getForPath(props.path),
+            setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
+        })
+    );
+    const helperButtons = helpers
         .filter((h): h is FormHelperButton | FormHelperCustomAddon => ['button', 'custom-addon'].includes(h.type))
         .filter((h) => h.enabled !== false)
         .filter((h) => isMatch(props.path, h.paths))
@@ -112,6 +136,27 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 </button>
             )
         );
+    const eventHandlers = Object.entries(
+        helpers
+            .filter((h): h is FormHelperEventHandler => h.type === 'event-handler')
+            .filter((h) => h.enabled !== false)
+            .filter((h) => isMatch(props.path, h.paths))
+            .reduce<Partial<Record<FormHelperEventHandlerType, FormHelperEventHandler['handler'][]>>>((acc, h) => {
+                if (acc[h.event] === undefined) acc[h.event] = [];
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                acc[h.event]!.push(h.handler);
+                return acc;
+            }, {})
+    ).reduce<SchemaTypeRendererProps['eventHandlers']>(
+        (acc, [event, handlers]) => ({
+            ...acc,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            [event]: (e: any) => {
+                for (const h of handlers) h(e);
+            },
+        }),
+        {}
+    );
 
     if (type in schemaTypeRenderers) {
         const SchemaTypeRenderer = schemaTypeRenderers[type];
@@ -125,6 +170,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 hasError={errors.length > 0}
                 errors={props.errors}
                 helpers={props.helpers}
+                eventHandlers={eventHandlers}
             />
         );
         const input = (
