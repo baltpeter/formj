@@ -10,7 +10,7 @@ import { emptyDefaultForJsonSchema, jsonPointerToPath } from './util';
 export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
     object: ObjT;
-    ajvResult: true | ValidationError[];
+    validationResult: true | ValidationError[];
 };
 export type FormChangedEvent<ObjT> = {
     event: 'changed';
@@ -55,7 +55,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
 
     const ajv = useMemo(() => props.customAjv || new Ajv(), [props.customAjv]);
     const ajvSchema = useMemo(() => ajv.compile(schema), [ajv, schema]);
-    const [ajvSchemaErrors, setAjvSchemaErrors] = useState<ValidationError[]>([]);
+    const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
     const formApi: FormApi<ObjT> = {
         overrideObject: (newObj) => objectStore.set.object(newObj),
@@ -63,9 +63,17 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         set: (path, value) => objectStore.set.setForPath(path, value),
 
         validate: () => {
-            const passed = ajvSchema(objectStore.get.object());
-            if (passed) {
-                setAjvSchemaErrors([]);
+            const obj = objectStore.get.object();
+            const ajvPassed = ajvSchema(obj);
+
+            const customErrors =
+                props.customValidators
+                    ?.map((v) => v(objectStore.get.object() as ObjT))
+                    .filter((r): r is ValidationError[] => r !== true)
+                    .flat() || [];
+
+            if (ajvPassed && customErrors.length === 0) {
+                setValidationErrors([]);
                 return true;
             }
 
@@ -84,19 +92,13 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                 return e;
             });
 
-            const customErrors =
-                props.customValidators
-                    ?.map((v) => v(objectStore.get.object() as ObjT))
-                    .filter((r): r is ValidationError[] => r !== true)
-                    .flat() || [];
-
             const errors = [...ajvErrors, ...customErrors];
-            setAjvSchemaErrors(errors);
+            setValidationErrors(errors);
             return errors;
         },
         submit: () => {
-            const ajvResult = formApi.validate();
-            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object() as ObjT, ajvResult });
+            const validationResult = formApi.validate();
+            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object() as ObjT, validationResult });
         },
     };
 
@@ -114,7 +116,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                 id={rootId}
                 path="$"
                 required={false}
-                errors={ajvSchemaErrors}
+                errors={validationErrors}
                 helpers={props.helpers || []}
             />
         </form>
