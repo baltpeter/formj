@@ -5,7 +5,7 @@ import type { JSONSchema7Definition } from 'json-schema';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { SchemaRenderer, type FormHelper, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
-import { emptyDefaultForJsonSchema, jsonPointerToPath } from './util';
+import { emptyDefaultForJsonSchema } from './util';
 
 export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
@@ -19,8 +19,8 @@ export type FormChangedEvent<ObjT> = {
 };
 export type FormApi<ObjT> = {
     overrideObject: (newObj: ObjT) => void;
-    get: (path: string) => unknown;
-    set: (path: string, value: unknown) => void;
+    get: (pointer: string) => unknown;
+    set: (pointer: string, value: unknown) => void;
 
     validate: () => true | ValidationError[];
     submit: () => void;
@@ -59,8 +59,8 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
 
     const formApi: FormApi<ObjT> = {
         overrideObject: (newObj) => objectStore.set.object(newObj),
-        get: (path) => objectStore.get.getForPath(path),
-        set: (path, value) => objectStore.set.setForPath(path, value),
+        get: (pointer) => objectStore.get.getForPointer(pointer),
+        set: (pointer, value) => objectStore.set.setForPointer(pointer, value),
 
         validate: () => {
             const obj = objectStore.get.object();
@@ -84,11 +84,8 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                     includeOriginalError: true,
                 }),
             ].map((e) => {
-                const path = jsonPointerToPath(e.pointer);
-
                 if (e.original?.keyword === 'required' && e.original?.params?.['missingProperty'])
-                    e.path = path + '.' + e.original.params['missingProperty'];
-                else e.path = path;
+                    e.pointer += '/' + e.original.params['missingProperty'];
                 return e;
             });
 
@@ -114,7 +111,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
             <SchemaRenderer
                 schema={schema}
                 id={rootId}
-                path="$"
+                pointer=""
                 required={false}
                 errors={validationErrors}
                 helpers={props.helpers || []}

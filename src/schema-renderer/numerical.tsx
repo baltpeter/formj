@@ -3,7 +3,7 @@ import { objectStore } from '../store';
 import type { SchemaTypeRendererProps } from './index';
 
 const NumericalRenderer = ({
-    path,
+    pointer,
     elementIds,
     schema,
     step,
@@ -16,17 +16,17 @@ const NumericalRenderer = ({
             className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
             required={required}
-            value={objectStore.useTracked.getForPath(path) ?? ''}
+            value={objectStore.useTracked.getForPointer(pointer) ?? ''}
             {...eventHandlers}
             onChange={(e) => {
-                objectStore.set.setForPath(
-                    path,
+                objectStore.set.setForPointer(
+                    pointer,
                     e.currentTarget.value === 'undefined' ? undefined : +e.currentTarget.value
                 );
                 eventHandlers.onChange?.(e);
             }}>
             {[
-                ...(!required || objectStore.useTracked.getForPath(path) === undefined ? ['undefined'] : []),
+                ...(!required || objectStore.useTracked.getForPointer(pointer) === undefined ? ['undefined'] : []),
                 ...schema.enum,
             ].map((v) => (
                 <option value={v as number}>{v === 'undefined' ? '' : v}</option>
@@ -39,11 +39,11 @@ const NumericalRenderer = ({
             required={required}
             className={c('form-control', 'form-control-sm', { 'is-invalid': hasError })}
             id={elementIds.input}
-            value={objectStore.useTracked.getForPath(path) ?? ''}
+            value={objectStore.useTracked.getForPointer(pointer) ?? ''}
             {...eventHandlers}
             // We can't use `onChange` here because that makes it impossible to enter fractional numbers.
             onBlur={(e) => {
-                objectStore.set.setForPath(path, +e.currentTarget.value);
+                objectStore.set.setForPointer(pointer, +e.currentTarget.value);
                 eventHandlers.onBlur?.(e);
             }}
         />
