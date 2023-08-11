@@ -22,7 +22,6 @@ export const StringRenderer = ({
 }: SchemaTypeRendererProps) => {
     const value = objectStore.useTracked.getForPath(path);
     const commonProps = {
-        pattern: schema.pattern,
         required,
         className: c('form-control', 'form-control-sm', { 'is-invalid': hasError }),
         id: elementIds.input,
