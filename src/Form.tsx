@@ -10,7 +10,7 @@ import { emptyDefaultForJsonSchema, jsonPointerToPath } from './util';
 export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
     object: ObjT;
-    ajvResult: true | ValidationError[];
+    validationResult: true | ValidationError[];
 };
 export type FormChangedEvent<ObjT> = {
     event: 'changed';
@@ -55,7 +55,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
 
     const ajv = useMemo(() => props.customAjv || new Ajv(), [props.customAjv]);
     const ajvSchema = useMemo(() => ajv.compile(schema), [ajv, schema]);
-    const [ajvSchemaErrors, setAjvSchemaErrors] = useState<ValidationError[]>([]);
+    const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
     const formApi: FormApi<ObjT> = {
         overrideObject: (newObj) => objectStore.set.object(newObj),
@@ -73,7 +73,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                     .flat() || [];
 
             if (ajvPassed && customErrors.length === 0) {
-                setAjvSchemaErrors([]);
+                setValidationErrors([]);
                 return true;
             }
 
@@ -93,12 +93,12 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
             });
 
             const errors = [...ajvErrors, ...customErrors];
-            setAjvSchemaErrors(errors);
+            setValidationErrors(errors);
             return errors;
         },
         submit: () => {
-            const ajvResult = formApi.validate();
-            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object() as ObjT, ajvResult });
+            const validationResult = formApi.validate();
+            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object() as ObjT, validationResult });
         },
     };
 
@@ -116,7 +116,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                 id={rootId}
                 path="$"
                 required={false}
-                errors={ajvSchemaErrors}
+                errors={validationErrors}
                 helpers={props.helpers || []}
             />
         </form>
