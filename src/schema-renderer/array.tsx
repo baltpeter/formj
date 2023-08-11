@@ -11,7 +11,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
     if (Array.isArray(items)) throw new Error('Currently, only array with object items are supported.');
     if (typeof items === 'boolean') return <></>;
 
-    const value = (objectStore.useTracked.getForPath(props.path) as unknown[]) || [];
+    const value = (objectStore.useTracked.getForPointer(props.pointer) as unknown[]) || [];
 
     const buttons = ({ index, clazz }: { index: number; clazz: string }) => (
         <>
@@ -20,8 +20,8 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                 type="button"
                 title="Delete this item"
                 onClick={() =>
-                    objectStore.set.setForPath(
-                        props.path,
+                    objectStore.set.setForPointer(
+                        props.pointer,
                         value.filter((_, i) => i !== index)
                     )
                 }>
@@ -32,7 +32,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                 type="button"
                 title="Move this item up"
                 disabled={index === 0}
-                onClick={() => objectStore.set.setForPath(props.path, swapElements(value, index, index - 1))}>
+                onClick={() => objectStore.set.setForPointer(props.pointer, swapElements(value, index, index - 1))}>
                 <i className="bi-arrow-up" />
             </button>
             <button
@@ -40,7 +40,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                 type="button"
                 title="Move this item down"
                 disabled={index === value.length - 1}
-                onClick={() => objectStore.set.setForPath(props.path, swapElements(value, index, index + 1))}>
+                onClick={() => objectStore.set.setForPointer(props.pointer, swapElements(value, index, index + 1))}>
                 <i className="bi-arrow-down" />
             </button>
         </>
@@ -60,7 +60,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                             <div className="col-sm">
                                 <SchemaRenderer
                                     id={`${props.id}-${index}`}
-                                    path={`${props.path}.${index}`}
+                                    pointer={`${props.pointer}/${index}`}
                                     schema={items}
                                     // TODO: I don't think this is correct, but I don't see what the correct behavior
                                     // should be, either.
@@ -81,7 +81,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                         {buttons({ index, clazz: 'btn btn-outline-secondary' })}
                         <SchemaRenderer
                             id={`${props.id}-${index}`}
-                            path={`${props.path}.${index}`}
+                            pointer={`${props.pointer}/${index}`}
                             schema={items}
                             // TODO: See above.
                             required={false}
@@ -99,7 +99,7 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                     'btn-primary': !props.hasError,
                     'btn-danger': props.hasError,
                 })}
-                onClick={() => objectStore.set.setForPath(props.path, [...value, emptyDefaultForJsonSchema(items)])}>
+                onClick={() => objectStore.set.setForPointer(`${props.pointer}/-`, emptyDefaultForJsonSchema(items))}>
                 Add item
             </button>
         </>

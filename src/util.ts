@@ -23,6 +23,3 @@ export const emptyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
 
     return undefined;
 };
-
-export const jsonPointerToPath = (pointer: string) =>
-    pointer === '' ? '$' : '$.' + pointer.substring(1).replace(/\//g, '.');

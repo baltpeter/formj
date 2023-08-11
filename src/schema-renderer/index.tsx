@@ -11,11 +11,7 @@ import { ObjectRenderer } from './object';
 import { StringRenderer } from './string';
 
 export type FormHelperButton = {
-    /**
-     * The path(s) to the fields that should get the helper in our format, e.g. `$.foo.1.bar`. These can include `*` as
-     * wildcards.
-     */
-    paths: string | string[];
+    pointers: string | string[];
     enabled?: boolean;
     hidden?: boolean;
     type: 'button';
@@ -23,14 +19,14 @@ export type FormHelperButton = {
     attributes: JSX.HTMLAttributes<HTMLButtonElement>;
 };
 export type FormHelperCustomAddon = {
-    paths: string | string[];
+    pointers: string | string[];
     enabled?: boolean;
     hidden?: boolean;
     type: 'custom-addon';
     element: ComponentChildren;
 };
 export type FormHelperEventHandler = {
-    paths: string | string[];
+    pointers: string | string[];
     enabled?: boolean;
     type: 'event-handler';
 } & (
@@ -53,27 +49,26 @@ export type FormHelperEventHandler = {
 );
 export type FormHelperEventHandlerType = FormHelperEventHandler['event'];
 export type FormHelperSuggestor = {
-    paths: string | string[];
+    pointers: string | string[];
     enabled?: boolean;
     type: 'suggestions';
     suggestions: () => unknown[];
 };
 export type FormHelper = (p: {
-    path: string;
+    pointer: string;
     value: unknown;
     setValue: (newValue: unknown) => void;
 }) => FormHelperButton | FormHelperCustomAddon | FormHelperEventHandler | FormHelperSuggestor;
 
 export type ValidationError = {
-    /** The path to the erroring field in our format, e.g. `$.foo.1.bar`. */
-    path: string;
+    pointer: string;
     message: string;
 };
 
 export type SchemaRendererProps = {
     schema: JSONSchema7Definition;
     id: string;
-    path: string;
+    pointer: string;
 
     required: boolean;
 
@@ -85,7 +80,7 @@ export type SchemaRendererProps = {
 export type SchemaTypeRendererProps = {
     schema: JSONSchema7;
     id: string;
-    path: string;
+    pointer: string;
 
     required: boolean;
     elementIds: {
@@ -118,19 +113,19 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
     const elementIds = { row: props.id, input: `${props.id}-input` };
-    const value = objectStore.useTracked.getForPath(props.path);
+    const value = objectStore.useTracked.getForPointer(props.pointer);
 
-    const errors = props.errors.filter((e) => e.path === props.path);
+    const errors = props.errors.filter((e) => e.pointer === props.pointer);
     const helpers = props.helpers
         .map((h) =>
             h({
-                path: props.path,
+                pointer: props.pointer,
                 value,
-                setValue: (newValue: unknown) => objectStore.set.setForPath(props.path, newValue),
+                setValue: (newValue: unknown) => objectStore.set.setForPointer(props.pointer, newValue),
             })
         )
         .filter((h) => h.enabled !== false)
-        .filter((h) => isMatch(props.path, h.paths));
+        .filter((h) => isMatch(props.pointer, h.pointers));
     const helperButtons = helpers
         .filter((h): h is FormHelperButton | FormHelperCustomAddon => ['button', 'custom-addon'].includes(h.type))
         .map((h) =>
@@ -178,7 +173,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
             <SchemaTypeRenderer
                 schema={schema}
                 id={props.id}
-                path={props.path}
+                pointer={props.pointer}
                 elementIds={elementIds}
                 required={props.required}
                 hasError={errors.length > 0}
@@ -220,7 +215,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                                     className="btn btn-sm btn-link"
                                     style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0;"
                                     title={`Apply suggestion: ${typeof s === 'string' ? s : JSON.stringify(s)}`}
-                                    onClick={() => objectStore.set.setForPath(props.path, s)}>
+                                    onClick={() => objectStore.set.setForPointer(props.pointer, s)}>
                                     <span className="formj-suggestion">
                                         {typeof s === 'string' ? s : JSON.stringify(s)}
                                     </span>
@@ -233,7 +228,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
             </>
         );
 
-        if (schema.title && props.path !== '$')
+        if (schema.title && props.pointer !== '')
             return (
                 <div id={elementIds.row} className="row mb-3">
                     <label for={elementIds.input} className="col-sm-3 col-form-label col-form-label-sm">
