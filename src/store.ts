@@ -12,6 +12,8 @@ export const objectStore = createStore('object')({
         setForPointer: (pointer: string, _value: unknown) => {
             const value = _value === '' || (Array.isArray(_value) && _value.length === 0) ? undefined : _value;
 
-            _set.state((draft) => jsonpointer.set(draft.object, pointer, value));
+            _set.state((draft) => {
+                jsonpointer.set(draft.object, pointer, value);
+            });
         },
     }));
