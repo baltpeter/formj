@@ -63,8 +63,16 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         set: (path, value) => objectStore.set.setForPath(path, value),
 
         validate: () => {
-            const passed = ajvSchema(objectStore.get.object());
-            if (passed) {
+            const obj = objectStore.get.object();
+            const ajvPassed = ajvSchema(obj);
+
+            const customErrors =
+                props.customValidators
+                    ?.map((v) => v(objectStore.get.object() as ObjT))
+                    .filter((r): r is ValidationError[] => r !== true)
+                    .flat() || [];
+
+            if (ajvPassed && customErrors.length === 0) {
                 setAjvSchemaErrors([]);
                 return true;
             }
@@ -83,12 +91,6 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                 else e.path = path;
                 return e;
             });
-
-            const customErrors =
-                props.customValidators
-                    ?.map((v) => v(objectStore.get.object() as ObjT))
-                    .filter((r): r is ValidationError[] => r !== true)
-                    .flat() || [];
 
             const errors = [...ajvErrors, ...customErrors];
             setAjvSchemaErrors(errors);
