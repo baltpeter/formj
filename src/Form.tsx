@@ -69,15 +69,13 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                 return true;
             }
 
-            // I initially used `[...new AggregateAjvError(…)]` here but the way microbundle transpiled that broke
-            // the functionality.
-            const ajvErrors = Array.from(
-                new AggregateAjvError(ajvSchema.errors || [], {
+            const ajvErrors = [
+                ...new AggregateAjvError(ajvSchema.errors || [], {
                     fieldLabels: 'js',
                     includeData: true,
                     includeOriginalError: true,
-                })
-            ).map((e) => {
+                }),
+            ].map((e) => {
                 const path = jsonPointerToPath(e.pointer);
 
                 if (e.original?.keyword === 'required' && e.original?.params?.['missingProperty'])
