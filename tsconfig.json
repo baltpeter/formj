@@ -2,12 +2,6 @@
     "extends": "@baltpeter/tsconfig/tsconfig.preact.json",
     "include": ["src/**/*"],
     "exclude": ["**/*.tmp.ts"],
-    "compilerOptions": {
-        // Necessary workaround for microbundle, see: https://github.com/developit/microbundle/issues/857#issuecomment-884939726
-        "jsx": "react-jsx",
-        "jsxFactory": "",
-        "jsxFragmentFactory": ""
-    },
     "typedocOptions": {
         "plugin": ["typedoc-plugin-markdown"],
         "entryPoints": ["src/index.ts"],

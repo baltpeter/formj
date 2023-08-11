@@ -163,14 +163,14 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
         }),
         {}
     );
-    const suggestions = Array.from(
-        new Set(
+    const suggestions = [
+        ...new Set(
             helpers
                 .filter((h): h is FormHelperSuggestor => h.type === 'suggestions')
                 .flatMap((h) => h.suggestions())
                 .filter((s) => s !== undefined && s !== value)
-        )
-    );
+        ),
+    ];
 
     if (type in schemaTypeRenderers) {
         const SchemaTypeRenderer = schemaTypeRenderers[type];
