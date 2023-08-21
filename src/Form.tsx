@@ -1,7 +1,7 @@
 import { AggregateAjvError } from '@segment/ajv-human-errors';
 import Ajv from 'ajv';
-import hash from 'hash-it';
 import type { JSONSchema7Definition } from 'json-schema';
+import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { SchemaRenderer, type FormHelper, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
@@ -44,10 +44,13 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: FormProps<ObjT>) => {
+    const [rootId] = useState(props.id || `formj-${nanoid()}`);
+
     useEffect(() => {
         const emptyObject = emptyDefaultForJsonSchema(schema) as Record<string, unknown>;
 
-        objectStore.set.object(
+        objectStore.set.overrideObject(
+            rootId,
             props.initialData !== undefined ? { ...emptyObject, ...props.initialData } : emptyObject
         );
         // We deliberately _don't_ want to update when `initialData` changes.
@@ -59,17 +62,17 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
     const formApi: FormApi<ObjT> = {
-        overrideObject: (newObj) => objectStore.set.object(newObj),
-        get: (pointer) => objectStore.get.getForPointer(pointer),
-        set: (pointer, value) => objectStore.set.setForPointer(pointer, value),
+        overrideObject: (newObj) => objectStore.set.overrideObject(rootId, newObj),
+        get: (pointer) => objectStore.get.getForPointer(rootId, pointer),
+        set: (pointer, value) => objectStore.set.setForPointer(rootId, pointer, value),
 
         validate: () => {
-            const obj = objectStore.get.object();
+            const obj = objectStore.get.getObject(rootId);
             const ajvPassed = ajvSchema(obj);
 
             const customErrors =
                 props.customValidators
-                    ?.map((v) => v(objectStore.get.object() as ObjT))
+                    ?.map((v) => v(obj as ObjT))
                     .filter((r): r is ValidationError[] => r !== true)
                     .flat() || [];
 
@@ -96,23 +99,31 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         },
         submit: () => {
             const validationResult = formApi.validate();
-            props.onSubmit?.({ event: 'submitted', object: objectStore.get.object() as ObjT, validationResult });
+            props.onSubmit?.({
+                event: 'submitted',
+                object: objectStore.get.getObject(rootId) as ObjT,
+                validationResult,
+            });
         },
     };
 
     if (props.onChange)
         objectStore.useStore.subscribe((state, prevState) =>
-            props.onChange?.({ event: 'changed', object: state.object as ObjT, oldObject: prevState.object as ObjT })
+            props.onChange?.({
+                event: 'changed',
+                object: state.objects[rootId] as ObjT,
+                oldObject: prevState.objects[rootId] as ObjT,
+            })
         );
     if (props.formApiRef) props.formApiRef.current = formApi;
 
-    const rootId = props.id || `formj-${hash(schema)}`;
     return (
         <form id={rootId} noValidate>
             <SchemaRenderer
                 schema={schema}
                 id={rootId}
                 pointer=""
+                storeId={rootId}
                 required={false}
                 errors={props.showValidationErrors === false ? [] : validationErrors}
                 helpers={props.helpers || []}

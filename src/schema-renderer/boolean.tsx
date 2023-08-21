@@ -10,13 +10,14 @@ const values = [
 
 export const BooleanRenderer = ({
     pointer,
+    storeId,
     elementIds,
     schema,
     required,
     hasError,
     eventHandlers,
 }: SchemaTypeRendererProps) => {
-    const value = objectStore.useTracked.getForPointer(pointer);
+    const value = objectStore.useTracked.getForPointer(storeId, pointer);
 
     return (
         <select
@@ -26,7 +27,11 @@ export const BooleanRenderer = ({
             value={value}
             {...eventHandlers}
             onChange={(e) => {
-                objectStore.set.setForPointer(pointer, { true: true, false: false, undefined }[e.currentTarget.value]);
+                objectStore.set.setForPointer(
+                    storeId,
+                    pointer,
+                    { true: true, false: false, undefined }[e.currentTarget.value]
+                );
                 eventHandlers.onChange?.(e);
             }}>
             {values
