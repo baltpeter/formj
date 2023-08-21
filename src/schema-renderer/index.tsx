@@ -69,6 +69,7 @@ export type SchemaRendererProps = {
     schema: JSONSchema7Definition;
     id: string;
     pointer: string;
+    storeId: string;
 
     required: boolean;
 
@@ -81,6 +82,7 @@ export type SchemaTypeRendererProps = {
     schema: JSONSchema7;
     id: string;
     pointer: string;
+    storeId: string;
 
     required: boolean;
     elementIds: {
@@ -113,7 +115,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     if (typeof type !== 'string') throw new Error('Currently, only string types are supported.');
 
     const elementIds = { row: props.id, input: `${props.id}-input` };
-    const value = objectStore.useTracked.getForPointer(props.pointer);
+    const value = objectStore.useTracked.getForPointer(props.storeId, props.pointer);
 
     const errors = props.errors.filter((e) => e.pointer === props.pointer);
     const helpers = props.helpers
@@ -121,7 +123,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
             h({
                 pointer: props.pointer,
                 value,
-                setValue: (newValue: unknown) => objectStore.set.setForPointer(props.pointer, newValue),
+                setValue: (newValue: unknown) => objectStore.set.setForPointer(props.storeId, props.pointer, newValue),
             })
         )
         .filter((h) => h.enabled !== false)
@@ -174,6 +176,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 schema={schema}
                 id={props.id}
                 pointer={props.pointer}
+                storeId={props.storeId}
                 elementIds={elementIds}
                 required={props.required}
                 hasError={errors.length > 0}
@@ -215,7 +218,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                                     className="btn btn-sm btn-link"
                                     style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0;"
                                     title={`Apply suggestion: ${typeof s === 'string' ? s : JSON.stringify(s)}`}
-                                    onClick={() => objectStore.set.setForPointer(props.pointer, s)}>
+                                    onClick={() => objectStore.set.setForPointer(props.storeId, props.pointer, s)}>
                                     <span className="formj-suggestion">
                                         {typeof s === 'string' ? s : JSON.stringify(s)}
                                     </span>

@@ -10,6 +10,7 @@ export const ObjectRenderer = ({ schema, ...props }: SchemaTypeRendererProps) =>
                 <SchemaRenderer
                     id={`${props.id}-${id}`}
                     pointer={`${props.pointer}/${id}`}
+                    storeId={props.storeId}
                     schema={subschema}
                     required={!!schema.required?.includes(id)}
                     errors={props.errors}

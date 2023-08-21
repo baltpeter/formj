@@ -14,13 +14,14 @@ const formatToType = {
 
 export const StringRenderer = ({
     pointer,
+    storeId,
     elementIds,
     schema,
     required,
     hasError,
     eventHandlers,
 }: SchemaTypeRendererProps) => {
-    const value = objectStore.useTracked.getForPointer(pointer);
+    const value = objectStore.useTracked.getForPointer(storeId, pointer);
     const commonProps = {
         required,
         className: c('form-control', 'form-control-sm', { 'is-invalid': hasError }),
@@ -29,7 +30,7 @@ export const StringRenderer = ({
         value: value ?? '',
         ...eventHandlers,
         onChange: (e: JSX.TargetedEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            objectStore.set.setForPointer(pointer, e.currentTarget.value);
+            objectStore.set.setForPointer(storeId, pointer, e.currentTarget.value);
             eventHandlers.onChange?.(e);
         },
     };
@@ -40,6 +41,7 @@ export const StringRenderer = ({
             className={c('form-select', 'form-select-sm', { 'is-invalid': hasError })}
             onChange={(e) => {
                 objectStore.set.setForPointer(
+                    storeId,
                     pointer,
                     e.currentTarget.value === 'undefined' ? undefined : e.currentTarget.value
                 );
