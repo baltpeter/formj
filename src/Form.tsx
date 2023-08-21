@@ -1,7 +1,7 @@
 import { AggregateAjvError } from '@segment/ajv-human-errors';
 import Ajv from 'ajv';
-import hash from 'hash-it';
 import type { JSONSchema7Definition } from 'json-schema';
+import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { SchemaRenderer, type FormHelper, type ValidationError } from './schema-renderer';
 import { objectStore } from './store';
@@ -44,6 +44,8 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: FormProps<ObjT>) => {
+    const [rootId] = useState(props.id || `formj-${nanoid()}`);
+
     useEffect(() => {
         const emptyObject = emptyDefaultForJsonSchema(schema) as Record<string, unknown>;
 
@@ -106,7 +108,6 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         );
     if (props.formApiRef) props.formApiRef.current = formApi;
 
-    const rootId = props.id || `formj-${hash(schema)}`;
     return (
         <form id={rootId} noValidate>
             <SchemaRenderer
