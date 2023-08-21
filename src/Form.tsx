@@ -30,6 +30,7 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
     id?: string;
     schema: JSONSchema7Definition;
     initialData?: ObjT;
+    showValidationErrors?: boolean;
 
     helpers?: FormHelper[];
 
@@ -113,7 +114,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                 id={rootId}
                 pointer=""
                 required={false}
-                errors={validationErrors}
+                errors={props.showValidationErrors === false ? [] : validationErrors}
                 helpers={props.helpers || []}
             />
         </form>
