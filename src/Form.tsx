@@ -31,6 +31,7 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
     schema: JSONSchema7Definition;
     initialData?: ObjT;
     showValidationErrors?: boolean;
+    autoComplete?: 'on' | 'off';
 
     helpers?: FormHelper[];
 
@@ -118,7 +119,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
     if (props.formApiRef) props.formApiRef.current = formApi;
 
     return (
-        <form id={rootId} noValidate>
+        <form id={rootId} noValidate autoComplete={props.autoComplete}>
             <SchemaRenderer
                 schema={schema}
                 id={rootId}
