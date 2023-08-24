@@ -9,16 +9,16 @@ import { emptyDefaultForJsonSchema } from './util';
 
 export type FormSubmittedEvent<ObjT> = {
     event: 'submitted';
-    object: ObjT;
+    object: Partial<ObjT>;
     validationResult: true | ValidationError[];
 };
 export type FormChangedEvent<ObjT> = {
     event: 'changed';
-    object: ObjT;
-    oldObject: ObjT;
+    object: Partial<ObjT>;
+    oldObject: Partial<ObjT>;
 };
 export type FormApi<ObjT> = {
-    overrideObject: (newObj: ObjT) => void;
+    overrideObject: (newObj: Partial<ObjT>) => void;
     get: (pointer: string) => unknown;
     set: (pointer: string, value: unknown) => void;
 
@@ -29,7 +29,7 @@ export type FormApi<ObjT> = {
 export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>> = {
     id?: string;
     schema: JSONSchema7Definition;
-    initialData?: ObjT;
+    initialData?: Partial<ObjT>;
     showValidationErrors?: boolean;
     autoComplete?: 'on' | 'off';
 
@@ -112,8 +112,8 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
         objectStore.useStore.subscribe((state, prevState) =>
             props.onChange?.({
                 event: 'changed',
-                object: state.objects[rootId] as ObjT,
-                oldObject: prevState.objects[rootId] as ObjT,
+                object: (state.objects[rootId] || {}) as ObjT,
+                oldObject: (prevState.objects[rootId] || {}) as ObjT,
             })
         );
     if (props.formApiRef) props.formApiRef.current = formApi;
