@@ -119,7 +119,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
     if (props.formApiRef) props.formApiRef.current = formApi;
 
     return (
-        <form id={rootId} noValidate autoComplete={props.autoComplete}>
+        <form id={rootId} noValidate autoComplete={props.autoComplete} onSubmit={(e) => e.preventDefault()}>
             <SchemaRenderer
                 schema={schema}
                 id={rootId}
