@@ -119,16 +119,29 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
     if (props.formApiRef) props.formApiRef.current = formApi;
 
     return (
-        <form id={rootId} noValidate autoComplete={props.autoComplete} onSubmit={(e) => e.preventDefault()}>
-            <SchemaRenderer
-                schema={schema}
-                id={rootId}
-                pointer=""
-                storeId={rootId}
-                required={false}
-                errors={props.showValidationErrors === false ? [] : validationErrors}
-                helpers={props.helpers || []}
-            />
-        </form>
+        <>
+            <style>
+                {
+                    // This is an ugly workaround. If an array element has helper buttons, we are wrapping it in two
+                    // `input-group`s (and I can't think of a clean way not to). This causes them to still render
+                    // correctly.
+                    `#${rootId} .input-group .input-group {
+                        flex: auto;
+                        width: 1%;
+                    }`
+                }
+            </style>
+            <form id={rootId} noValidate autoComplete={props.autoComplete} onSubmit={(e) => e.preventDefault()}>
+                <SchemaRenderer
+                    schema={schema}
+                    id={rootId}
+                    pointer=""
+                    storeId={rootId}
+                    required={false}
+                    errors={props.showValidationErrors === false ? [] : validationErrors}
+                    helpers={props.helpers || []}
+                />
+            </form>
+        </>
     );
 };
