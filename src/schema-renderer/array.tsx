@@ -107,7 +107,11 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                     'btn-danger': props.hasError,
                 })}
                 onClick={() =>
-                    objectStore.set.setForPointer(props.storeId, `${props.pointer}/-`, emptyDefaultForJsonSchema(items))
+                    objectStore.set.setForPointer(
+                        props.storeId,
+                        `${props.pointer}/-`,
+                        emptyDefaultForJsonSchema(items, { isNewArrayElement: true })
+                    )
                 }>
                 Add item
             </button>

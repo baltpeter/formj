@@ -8,7 +8,7 @@ export const swapElements = <T>(array: T[], i: number, j: number): T[] => {
     return arrayCopy;
 };
 
-export const emptyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
+export const emptyDefaultForJsonSchema = (schema: JSONSchema7Definition, options?: { isNewArrayElement?: true }) => {
     if (typeof schema === 'boolean') return schema;
 
     if (schema.default !== undefined) return schema.default;
@@ -20,6 +20,9 @@ export const emptyDefaultForJsonSchema = (schema: JSONSchema7Definition) => {
         return object;
     }
     if (schema.type === 'null') return null;
+
+    // Start new arrays with one empty element.
+    if (options?.isNewArrayElement === true) return null;
 
     return undefined;
 };
