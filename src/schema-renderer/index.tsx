@@ -118,6 +118,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
     const value = objectStore.useTracked.getForPointer(props.storeId, props.pointer);
 
     const errors = props.errors.filter((e) => e.pointer === props.pointer);
+    const hasError = errors.length > 0;
     const helpers = props.helpers
         .map((h) =>
             h({
@@ -179,7 +180,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 storeId={props.storeId}
                 elementIds={elementIds}
                 required={props.required}
-                hasError={errors.length > 0}
+                hasError={hasError}
                 errors={props.errors}
                 helpers={props.helpers}
                 eventHandlers={eventHandlers}
@@ -197,7 +198,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                             </div>
                         </>
                     ) : (
-                        <div className="input-group input-group-sm">
+                        <div className={c('input-group', 'input-group-sm', { 'is-invalid': hasError })}>
                             {schemaTypeRenderer}
                             {helperButtons}
                         </div>
