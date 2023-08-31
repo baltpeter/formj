@@ -216,6 +216,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                         {suggestions.map((s, i) => (
                             <>
                                 <button
+                                    type="button"
                                     className="btn btn-sm btn-link"
                                     style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0;"
                                     title={`Apply suggestion: ${typeof s === 'string' ? s : JSON.stringify(s)}`}
