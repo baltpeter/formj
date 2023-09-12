@@ -46,6 +46,10 @@ export type FormHelperEventHandler = {
           event: 'onClick' | 'onDblClick';
           handler: (event: JSX.TargetedMouseEvent<EventTarget>) => void;
       }
+    | {
+          event: 'onPaste' | 'onCopy' | 'onCut';
+          handler: (event: JSX.TargetedClipboardEvent<EventTarget>) => void;
+      }
 );
 export type FormHelperEventHandlerType = FormHelperEventHandler['event'];
 export type FormHelperSuggestor = {
