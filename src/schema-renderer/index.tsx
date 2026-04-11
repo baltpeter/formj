@@ -73,6 +73,7 @@ export type SchemaRendererProps = {
     schema: JSONSchema7Definition;
     id: string;
     pointer: string;
+    pointersToHide?: string[];
     storeId: string;
 
     required: boolean;
@@ -86,6 +87,7 @@ export type SchemaTypeRendererProps = {
     schema: JSONSchema7;
     id: string;
     pointer: string;
+    pointersToHide?: string[];
     storeId: string;
 
     required: boolean;
@@ -113,6 +115,8 @@ const schemaTypeRenderers = {
 } satisfies Record<string, FunctionComponent<SchemaTypeRendererProps>>;
 
 export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
+    if (props.pointersToHide !== undefined && isMatch(props.pointer, props.pointersToHide)) return <></>;
+
     if (typeof schema === 'boolean') return <></>;
 
     const type = schema.type;
@@ -181,6 +185,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 schema={schema}
                 id={props.id}
                 pointer={props.pointer}
+                pointersToHide={props.pointersToHide}
                 storeId={props.storeId}
                 elementIds={elementIds}
                 required={props.required}

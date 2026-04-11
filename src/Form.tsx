@@ -33,6 +33,8 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
     showValidationErrors?: boolean;
     autoComplete?: 'on' | 'off';
 
+    pointersToHide?: string[];
+
     helpers?: FormHelper[];
 
     customAjv?: Ajv;
@@ -136,6 +138,7 @@ export const Form = <ObjT extends Record<string, any>>({ schema, ...props }: For
                     schema={schema}
                     id={rootId}
                     pointer=""
+                    pointersToHide={props.pointersToHide}
                     storeId={rootId}
                     required={false}
                     errors={props.showValidationErrors === false ? [] : validationErrors}
