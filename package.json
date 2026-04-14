@@ -1,6 +1,6 @@
 {
     "name": "formj",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "A Preact library for creating forms based on a JSON Schema.",
     "bugs": "https://github.com/baltpeter/formj/issues",
     "repository": {
