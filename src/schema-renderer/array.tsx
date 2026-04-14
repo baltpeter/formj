@@ -73,12 +73,12 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                                 <SchemaRenderer
                                     id={`${props.id}-${index}`}
                                     pointer={pointer}
-                                    pointersToHide={props.pointersToHide}
                                     storeId={props.storeId}
                                     schema={items}
                                     // TODO: I don't think this is correct, but I don't see what the correct behavior
                                     // should be, either.
                                     required={false}
+                                    pointersToHide={props.pointersToHide}
                                     errors={props.errors}
                                     helpers={props.helpers}
                                 />
@@ -91,11 +91,11 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                         <SchemaRenderer
                             id={`${props.id}-${index}`}
                             pointer={pointer}
-                            pointersToHide={props.pointersToHide}
                             storeId={props.storeId}
                             schema={items}
                             // TODO: See above.
                             required={false}
+                            pointersToHide={props.pointersToHide}
                             errors={props.errors}
                             helpers={props.helpers}
                         />

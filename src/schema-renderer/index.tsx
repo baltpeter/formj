@@ -73,10 +73,10 @@ export type SchemaRendererProps = {
     schema: JSONSchema7Definition;
     id: string;
     pointer: string;
-    pointersToHide?: string[];
     storeId: string;
 
     required: boolean;
+    pointersToHide?: string[];
 
     errors: ValidationError[];
 
@@ -87,10 +87,11 @@ export type SchemaTypeRendererProps = {
     schema: JSONSchema7;
     id: string;
     pointer: string;
-    pointersToHide?: string[];
     storeId: string;
 
     required: boolean;
+    pointersToHide?: string[];
+
     elementIds: {
         row: string;
         input: string;
@@ -185,10 +186,10 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 schema={schema}
                 id={props.id}
                 pointer={props.pointer}
-                pointersToHide={props.pointersToHide}
                 storeId={props.storeId}
                 elementIds={elementIds}
                 required={props.required}
+                pointersToHide={props.pointersToHide}
                 hasError={hasError}
                 errors={props.errors}
                 helpers={props.helpers}
