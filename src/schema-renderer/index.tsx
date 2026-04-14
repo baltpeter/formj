@@ -76,6 +76,7 @@ export type SchemaRendererProps = {
     storeId: string;
 
     required: boolean;
+    pointersToHide?: string[];
 
     errors: ValidationError[];
 
@@ -89,6 +90,8 @@ export type SchemaTypeRendererProps = {
     storeId: string;
 
     required: boolean;
+    pointersToHide?: string[];
+
     elementIds: {
         row: string;
         input: string;
@@ -113,6 +116,8 @@ const schemaTypeRenderers = {
 } satisfies Record<string, FunctionComponent<SchemaTypeRendererProps>>;
 
 export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
+    if (props.pointersToHide !== undefined && isMatch(props.pointer, props.pointersToHide)) return <></>;
+
     if (typeof schema === 'boolean') return <></>;
 
     const type = schema.type;
@@ -184,6 +189,7 @@ export const SchemaRenderer = ({ schema, ...props }: SchemaRendererProps) => {
                 storeId={props.storeId}
                 elementIds={elementIds}
                 required={props.required}
+                pointersToHide={props.pointersToHide}
                 hasError={hasError}
                 errors={props.errors}
                 helpers={props.helpers}

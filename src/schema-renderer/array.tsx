@@ -1,4 +1,5 @@
 import c from 'classnames';
+import { isMatch } from 'matcher';
 import { objectStore } from '../store';
 import { emptyDefaultForJsonSchema, swapElements } from '../util';
 import type { SchemaTypeRendererProps } from './index';
@@ -53,8 +54,14 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
 
     return (
         <>
-            {value.map((_, index) =>
-                ['object', 'array'].includes(items.type as string) || items.format === 'text' ? (
+            {value.map((_, index) => {
+                const pointer = `${props.pointer}/${index}`;
+                // Without this, `/array/<index>` would only hide the actual field but not the buttons beside it. I'm
+                // not sure why you would ever want to do that, but we allow arbitrary JSON pointers and this
+                // implementation makes the most sense to me.
+                if (props.pointersToHide !== undefined && isMatch(pointer, props.pointersToHide)) return <></>;
+
+                return ['object', 'array'].includes(items.type as string) || items.format === 'text' ? (
                     <>
                         <div className="row mb-3">
                             <div className="col-sm-1">
@@ -65,12 +72,13 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                             <div className="col-sm">
                                 <SchemaRenderer
                                     id={`${props.id}-${index}`}
-                                    pointer={`${props.pointer}/${index}`}
+                                    pointer={pointer}
                                     storeId={props.storeId}
                                     schema={items}
                                     // TODO: I don't think this is correct, but I don't see what the correct behavior
                                     // should be, either.
                                     required={false}
+                                    pointersToHide={props.pointersToHide}
                                     errors={props.errors}
                                     helpers={props.helpers}
                                 />
@@ -82,17 +90,18 @@ export const ArrayRenderer = ({ schema, elementIds, ...props }: SchemaTypeRender
                         {buttons({ index, clazz: 'btn btn-outline-secondary' })}
                         <SchemaRenderer
                             id={`${props.id}-${index}`}
-                            pointer={`${props.pointer}/${index}`}
+                            pointer={pointer}
                             storeId={props.storeId}
                             schema={items}
                             // TODO: See above.
                             required={false}
+                            pointersToHide={props.pointersToHide}
                             errors={props.errors}
                             helpers={props.helpers}
                         />
                     </div>
-                )
-            )}
+                );
+            })}
 
             <button
                 type="button"
