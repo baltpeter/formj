@@ -32,6 +32,7 @@ export type FormProps<ObjT extends Record<string, any> = Record<string, unknown>
     initialData?: Partial<ObjT>;
     showValidationErrors?: boolean;
     autoComplete?: 'on' | 'off';
+    /** Array of JSON pointers to fields that should be hidden in the form. You can use wildcards. */
     pointersToHide?: string[];
 
     helpers?: FormHelper[];
